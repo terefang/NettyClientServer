@@ -10,8 +10,7 @@ public abstract class AbstractNcsPacket implements NcsPacket
     public ByteBuf encodeToBuffer(ByteBufAllocator _alloc)
     {
         byte[] _bytes = this.serialize();
-        ByteBuf _buf = _alloc.buffer(_bytes.length+4);
-        _buf.writeInt(_bytes.length);
+        ByteBuf _buf = _alloc.buffer(_bytes.length);
         _buf.writeBytes(_bytes);
         return _buf;
     }

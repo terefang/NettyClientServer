@@ -7,6 +7,13 @@ import com.github.terefang.ncs.common.SimpleBytesNcsPacketFactory;
 
 public class NcsServerHelper
 {
+    public static final int DEFAULT_MAx_FRAME_LENGTH = 8192;
+
+    public static final NcsServerService createSimpleServer(String _local, int _port, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createServer(_local, _port, DEFAULT_MAx_FRAME_LENGTH, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
+    }
+
     public static final NcsServerService createSimpleServer(String _local, int _port, int _maxFrameLength, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         return createServer(_local, _port, _maxFrameLength, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
@@ -17,9 +24,24 @@ public class NcsServerHelper
         return createServer(null, _port, _maxFrameLength, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
     }
 
+    public static final NcsServerService createSimpleServer(int _port, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createServer(null, _port, DEFAULT_MAx_FRAME_LENGTH, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
+    }
+
     public static final NcsServerService createServer(int _port, int _maxFrameLength, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         return createServer(null, _port, _maxFrameLength, _factory, _plistener, _slistenner);
+    }
+
+    public static final NcsServerService createServer(int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createServer(null, _port, DEFAULT_MAx_FRAME_LENGTH, _factory, _plistener, _slistenner);
+    }
+
+    public static final NcsServerService createServer(String _local, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createServer(_local, _port, DEFAULT_MAx_FRAME_LENGTH, _factory, _plistener, _slistenner);
     }
 
     public static final NcsServerService createServer(String _local, int _port, int _maxFrameLength, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)

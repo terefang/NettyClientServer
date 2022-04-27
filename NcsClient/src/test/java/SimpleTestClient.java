@@ -14,7 +14,7 @@ public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
     public static void main(String[] args) {
         SimpleTestClient _main = new SimpleTestClient();
 
-        NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, 65535, _main, _main);
+        NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, _main, _main);
 
         _client.connectNow();
 

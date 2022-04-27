@@ -12,7 +12,7 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
     public static void main(String[] args) {
         SimpleTestServer _main = new SimpleTestServer();
 
-        NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, 65536, _main, _main);
+        NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
         _svc.startNow();
     }

@@ -3,8 +3,10 @@ package com.github.terefang.ncs.server.impl;
 import com.github.terefang.ncs.common.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 public class NcsServerChannelInitializer extends ChannelInitializer<NioSocketChannel>
 {
@@ -23,13 +25,23 @@ public class NcsServerChannelInitializer extends ChannelInitializer<NioSocketCha
     protected void initChannel(NioSocketChannel _ch) throws Exception
     {
         // server input
-        _ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(_maxFrameLength, 0, 4, 0, 4));
+        ChannelPipeline _pl = _ch.pipeline();
+        if(_maxFrameLength>=65536)
+        {
+            _pl.addLast(new LengthFieldBasedFrameDecoder(_maxFrameLength, 0, 4, 0, 4));
+            _pl.addLast(new LengthFieldPrepender(4, false));
+        }
+        else
+        {
+            _pl.addLast(new LengthFieldBasedFrameDecoder(_maxFrameLength, 0, 2, 0, 2));
+            _pl.addLast(new LengthFieldPrepender(2, false));
+        }
         //_ch.pipeline().addLast(new LoggingHandler(LogLevel.WARN));
         // server output
-        _ch.pipeline().addLast(new NcsPacketEncoder());
-        _ch.pipeline().addLast(new NcsPacketDecoder(_packetFactory));
+        _pl.addLast(new NcsPacketEncoder(_packetFactory));
+        _pl.addLast(new NcsPacketDecoder(_packetFactory));
 
         // pojo codec
-        _ch.pipeline().addLast(new NcsServerPacketHandlerImpl(_ch, _packetListener, _stateListener));
+        _pl.addLast(new NcsServerPacketHandlerImpl(_ch, _packetListener, _stateListener));
     }
 }
