@@ -1,0 +1,5 @@
+/.idea/
+# Project exclude paths
+/NcsClient/target/
+/NcsCommons/target/
+/NcsServer/target/
