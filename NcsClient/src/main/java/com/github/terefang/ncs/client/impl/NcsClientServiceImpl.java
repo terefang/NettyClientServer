@@ -30,11 +30,7 @@ public class NcsClientServiceImpl implements NcsClientService
         _bootstrap.channel(NioSocketChannel.class);
         _bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
         _bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.configuration.getTimeout());
-        _bootstrap.handler(new NcsClientChannelInitializer(
-                this.configuration.getMaxFrameLength(),
-                this.configuration.getPacketFactory(),
-                this.configuration.getPacketListener(),
-                this.configuration.getStateListener()));
+        _bootstrap.handler(new NcsClientChannelInitializer(this.configuration));
 
         _future =  _bootstrap.connect(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
         return _future;

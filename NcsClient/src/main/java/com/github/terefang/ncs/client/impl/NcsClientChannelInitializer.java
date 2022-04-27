@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.client.impl;
 
+import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.common.*;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -11,36 +12,30 @@ import java.nio.channels.SocketChannel;
 
 public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketChannel>
 {
-    int _maxFrameLength;
-    NcsPacketFactory _packetFactory;
-    NcsPacketListener _packetListener;
-    NcsStateListener _stateListener;
+    NcsClientConfiguration _config;
 
-    public NcsClientChannelInitializer(int _maxFrameLength, NcsPacketFactory _packetFactory, NcsPacketListener _packetListener, NcsStateListener _stateListener) {
-        this._maxFrameLength=_maxFrameLength;
-        this._packetFactory=_packetFactory;
-        this._packetListener=_packetListener;
-        this._stateListener=_stateListener;
+    public NcsClientChannelInitializer(NcsClientConfiguration _config) {
+        this._config = _config;
     }
 
     @Override
     protected void initChannel(NioSocketChannel _ch) throws Exception
     {
         ChannelPipeline _pl = _ch.pipeline();
-        if(_maxFrameLength>=65536)
+        if(this._config.getMaxFrameLength()>=65536)
         {
-            _pl.addLast(new LengthFieldBasedFrameDecoder(_maxFrameLength, 0, 4, 0, 4));
+            _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));
             _pl.addLast(new LengthFieldPrepender(4, false));
         }
         else
         {
-            _pl.addLast(new LengthFieldBasedFrameDecoder(_maxFrameLength, 0, 2, 0, 2));
+            _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 2, 0, 2));
             _pl.addLast(new LengthFieldPrepender(2, false));
         }
-        _pl.addLast(new NcsPacketEncoder(_packetFactory));
-        _pl.addLast(new NcsPacketDecoder(_packetFactory));
+        _pl.addLast(new NcsPacketEncoder(this._config.getPacketFactory()));
+        _pl.addLast(new NcsPacketDecoder(this._config.getPacketFactory()));
 
         // pojo codec
-        _pl.addLast(new NcsClientPacketHandlerImpl(_ch, _packetListener, _stateListener));
+        _pl.addLast(new NcsClientPacketHandlerImpl(_ch, this._config.getPacketListener(), this._config.getStateListener()));
     }
 }

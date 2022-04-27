@@ -59,11 +59,7 @@ public class NcsServerServiceImpl implements NcsServerService
         //_tcpBootstrap.option(ChannelOption.SO_KEEPALIVE, true);
         //_tcpBootstrap.option(ChannelOption.SO_LINGER, 0);
 
-        _tcpBootstrap.childHandler(new NcsServerChannelInitializer(
-                this.configuration.getMaxFrameLength(),
-                this.configuration.getPacketFactory(),
-                this.configuration.getPacketListener(),
-                this.configuration.getStateListener()));
+        _tcpBootstrap.childHandler(new NcsServerChannelInitializer(this.configuration));
 
         return _tcpBootstrap.bind();
     }
