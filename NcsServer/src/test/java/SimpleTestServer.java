@@ -4,28 +4,17 @@ import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.common.SimpleBytesNcsPacketFactory;
-import com.github.terefang.ncs.server.NcsServerConfiguration;
+import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 
 public class SimpleTestServer implements NcsPacketListener, NcsStateListener
 {
     public static void main(String[] args) {
-        NcsServerConfiguration _config = NcsServerConfiguration.create();
-        _config.setEndpointAddress(null);
-        _config.setEndpointPort(56789);
-
-        _config.setMaxFrameLength(65535);
-        _config.setTimeout(3);
-        _config.setBacklog(100);
-        _config.setWorkers(10);
-
-        _config.setPacketFactory(new SimpleBytesNcsPacketFactory());
-
         SimpleTestServer _main = new SimpleTestServer();
-        _config.setPacketListener(_main);
-        _config.setStateListener(_main);
 
-        NcsServerService.build(_config).startNow();
+        NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, 65536, _main, _main);
+
+        _svc.startNow();
     }
 
     @Override

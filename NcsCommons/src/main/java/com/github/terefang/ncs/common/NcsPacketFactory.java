@@ -6,4 +6,5 @@ import io.netty.buffer.ByteBufAllocator;
 public interface NcsPacketFactory {
     NcsPacket unpack(ByteBuf _buf);
     ByteBuf pack(NcsPacket _pkt, ByteBufAllocator alloc);
+    public NcsPacket create();
 }

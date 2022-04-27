@@ -16,6 +16,8 @@ public interface NcsClientService
         return _nss;
     }
 
+    NcsPacket createPacket();
+
     Future connect() throws Exception;
     Future disconnect() throws Exception;
 
@@ -35,5 +37,6 @@ public interface NcsClientService
 
     void send(NcsPacket _pkt);
 
+    void flush();
     void sendAndFlush(NcsPacket _pkt);
 }

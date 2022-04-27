@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.server;
 
+import com.github.terefang.ncs.common.NcsPacket;
 import com.github.terefang.ncs.server.impl.NcsServerServiceImpl;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
@@ -14,6 +15,8 @@ public interface NcsServerService
         _nss.setConfiguration(_config);
         return _nss;
     }
+
+    NcsPacket createPacket();
 
     Future start();
 

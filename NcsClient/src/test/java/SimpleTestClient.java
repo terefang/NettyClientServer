@@ -1,34 +1,24 @@
 import com.github.terefang.ncs.client.NcsClientConfiguration;
+import com.github.terefang.ncs.client.NcsClientHelper;
 import com.github.terefang.ncs.client.NcsClientService;
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacket;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.SimpleBytesNcsPacket;
-import com.github.terefang.ncs.common.SimpleBytesNcsPacketFactory;
 import lombok.SneakyThrows;
 
 public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
 {
     @SneakyThrows
     public static void main(String[] args) {
-        NcsClientConfiguration _config = NcsClientConfiguration.create();
-        _config.setEndpointAddress("127.0.0.1");
-        _config.setEndpointPort(56789);
-
-        _config.setMaxFrameLength(65535);
-        _config.setTimeout(3);
-
-        _config.setPacketFactory(new SimpleBytesNcsPacketFactory());
-
         SimpleTestClient _main = new SimpleTestClient();
-        _config.setPacketListener(_main);
-        _config.setStateListener(_main);
 
-        NcsClientService _client = NcsClientService.build(_config);
+        NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, 65535, _main, _main);
+
         _client.connectNow();
 
-        SimpleBytesNcsPacket _pkt = SimpleBytesNcsPacket.create();
+        SimpleBytesNcsPacket _pkt = (SimpleBytesNcsPacket) _client.createPacket();
         _pkt.startEncoding();
         _pkt.encodeBytes("CONN".getBytes());
         _pkt.encodeInt(65535);

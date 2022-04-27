@@ -29,6 +29,11 @@ public class NcsServerServiceImpl implements NcsServerService
         this.configuration = configuration;
     }
 
+    @Override
+    public NcsPacket createPacket() {
+        return this.configuration.getPacketFactory().create();
+    }
+
 
     @Override
     public Future start()

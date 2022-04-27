@@ -41,6 +41,11 @@ public class NcsClientServiceImpl implements NcsClientService
     }
 
     @Override
+    public NcsPacket createPacket() {
+        return this.configuration.getPacketFactory().create();
+    }
+
+    @Override
     public Future disconnect() throws Exception {
         return _future.channel().disconnect();
     }
@@ -59,5 +64,10 @@ public class NcsClientServiceImpl implements NcsClientService
     @Override
     public void sendAndFlush(NcsPacket _pkt) {
         _future.channel().writeAndFlush(_pkt);
+    }
+
+    @Override
+    public void flush() {
+        _future.channel().flush();
     }
 }

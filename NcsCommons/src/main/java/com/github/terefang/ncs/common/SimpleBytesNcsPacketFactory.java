@@ -18,4 +18,7 @@ public class SimpleBytesNcsPacketFactory implements NcsPacketFactory
     public ByteBuf pack(NcsPacket _pkt, ByteBufAllocator _alloc) {
         return _pkt.encodeToBuffer(_alloc);
     }
+
+    @Override
+    public NcsPacket create() { return SimpleBytesNcsPacket.create(); };
 }
