@@ -18,7 +18,7 @@ public class NcsPacketDecoder extends MessageToMessageDecoder<ByteBuf>
     @Override
     protected void decode(ChannelHandlerContext _ctx, ByteBuf _buf, List<Object> _list) throws Exception
     {
-        NcsPacket _pkt = this._factory.create(_buf);
+        NcsPacket _pkt = this._factory.unpack(_buf);
         _list.add(_pkt);
     }
 }

@@ -1,6 +1,5 @@
-package com.github.terefang.ncs.common.impl;
+package com.github.terefang.ncs.common;
 
-import com.github.terefang.ncs.common.NcsPacket;
 import io.netty.buffer.ByteBuf;
 import lombok.SneakyThrows;
 

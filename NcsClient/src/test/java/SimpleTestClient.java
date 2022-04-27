@@ -4,8 +4,8 @@ import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacket;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
-import com.github.terefang.ncs.common.impl.SimpleBytesNcsPacket;
-import com.github.terefang.ncs.common.impl.SimpleBytesNcsPacketFactory;
+import com.github.terefang.ncs.common.SimpleBytesNcsPacket;
+import com.github.terefang.ncs.common.SimpleBytesNcsPacketFactory;
 import lombok.SneakyThrows;
 
 public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
