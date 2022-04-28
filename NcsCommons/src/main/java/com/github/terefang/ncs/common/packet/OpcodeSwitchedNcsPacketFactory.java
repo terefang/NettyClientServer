@@ -47,7 +47,17 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
      * @return the buffer
      */
     @Override
-    public ByteBuf pack(NcsPacket _pkt, ByteBufAllocator _alloc) {
+    public ByteBuf pack(NcsPacket _pkt, ByteBufAllocator _alloc)
+    {
+        if(_pkt instanceof AbstractOpcodeNcsPacket)
+        {
+            int _opcode = ((AbstractOpcodeNcsPacket)_pkt).getOpcode();
+            if(_registry.containsKey(_opcode))
+            {
+                return _registry.get(_opcode).pack(_pkt, _alloc);
+            }
+            throw new IllegalArgumentException("illegal opcode in packet "+_opcode);
+        }
         return _pkt.encodeToBuffer(_alloc);
     }
 
