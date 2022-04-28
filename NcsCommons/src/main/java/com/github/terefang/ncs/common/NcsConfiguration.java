@@ -49,6 +49,12 @@ public class NcsConfiguration
 
     String[] tlsProtocols = { "TLSv1.2" };
 
+
+    boolean usePskOBF = false;
+
+    String pskSharedSecret = "530d07e5-cba8-476b-aed8-0114b8e550d6";
+
+
     @SneakyThrows
     public void setEndpointAddress(String _s)
     {

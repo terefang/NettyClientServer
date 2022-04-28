@@ -155,4 +155,9 @@ public interface NcsClientService
      * convenience handler to set config option -- see NcsClientConfiguration for details
      */
     public void setEndpoint(String _s, int _p);
+
+    /**
+     * convenience handler to set config option -- see NcsClientConfiguration for details
+     */
+    public void setSharedSecret(String _s);
 }

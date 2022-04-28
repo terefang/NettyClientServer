@@ -2,6 +2,8 @@ package com.github.terefang.ncs.server.impl;
 
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsEndpoint;
+import com.github.terefang.ncs.common.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.impl.NcsConnectionImpl;
 import com.github.terefang.ncs.server.NcsClientConnection;
 import io.netty.channel.Channel;
@@ -16,17 +18,21 @@ public class NcsClientConnectionImpl extends NcsConnectionImpl implements NcsCli
         super();
     }
 
-    public static NcsConnection from(Channel _ch, InetAddress address, int port)
+    public static NcsClientConnectionImpl from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch, InetAddress address, int port)
     {
         NcsClientConnectionImpl _nc = new NcsClientConnectionImpl();
         _nc.setPeer(NcsEndpoint.from(address, port));
+        _nc.setPacketListener(_pl);
+        _nc.setStateListener(_sl);
         _nc.setChannel(_ch);
         return _nc;
     }
 
-    public static NcsConnection from(Channel _ch)
+    public static NcsClientConnectionImpl from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch)
     {
         NcsClientConnectionImpl _nc = new NcsClientConnectionImpl();
+        _nc.setPacketListener(_pl);
+        _nc.setStateListener(_sl);
         _nc.setChannel(_ch);
         if(_ch instanceof SocketChannel)
         {

@@ -117,4 +117,8 @@ public interface NcsServerService
      * convenience handler to set config option -- see NcsServerConfiguration for details
      */
     public void setEndpoint(String _s, int _p);
+    /**
+     * convenience handler to set config option -- see NcsServerConfiguration for details
+     */
+    public void setSharedSecret(String _s);
 }

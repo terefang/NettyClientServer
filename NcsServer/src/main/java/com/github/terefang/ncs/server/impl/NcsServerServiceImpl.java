@@ -138,4 +138,18 @@ public class NcsServerServiceImpl implements NcsServerService
     public void setEndpoint(String _s, int _p) {
         configuration.setEndpoint(_s, _p);
     }
+
+    @Override
+    public void setSharedSecret(String _s)
+    {
+        this.configuration.setPskSharedSecret(_s);
+        if(_s==null)
+        {
+            this.configuration.setUsePskOBF(false);
+        }
+        else
+        {
+            this.configuration.setUsePskOBF(true);
+        }
+    }
 }

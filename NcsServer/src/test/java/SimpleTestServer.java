@@ -20,6 +20,9 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
         // configure simple server
         NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
+        _svc.setSharedSecret(null);
+        //_svc.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+
         // use optimized linux epoll transport
         _svc.setUseEpoll(true);
 

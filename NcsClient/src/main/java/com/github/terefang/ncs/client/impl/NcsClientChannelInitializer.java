@@ -3,6 +3,7 @@ package com.github.terefang.ncs.client.impl;
 import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.common.packet.NcsPacketDecoder;
 import com.github.terefang.ncs.common.packet.NcsPacketEncoder;
+import com.github.terefang.ncs.common.pskobf.NcsPskObfCodec;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -43,18 +44,24 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
         // select a frame format based on max-frame-size
         if(this._config.getMaxFrameLength()>=65536)
         {
-            _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));
-            _pl.addLast(new LengthFieldPrepender(4, false));
+            _pl.addLast("frame-decoder", new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));
+            _pl.addLast("frame-encoder", new LengthFieldPrepender(4, false));
         }
         else
         {
             _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 2, 0, 2));
             _pl.addLast(new LengthFieldPrepender(2, false));
         }
-        _pl.addLast(new NcsPacketEncoder(this._config.getPacketFactory()));
-        _pl.addLast(new NcsPacketDecoder(this._config.getPacketFactory()));
+
+        if(this._config.isUsePskOBF() && this._config.getPskSharedSecret()!=null)
+        {
+            _pl.addLast("frame-obfuscator", NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength()));
+        }
+
+        _pl.addLast("packet-encoder", new NcsPacketEncoder(this._config.getPacketFactory()));
+        _pl.addLast("packet-decoder", new NcsPacketDecoder(this._config.getPacketFactory()));
 
         // pojo codec
-        _pl.addLast(new NcsClientPacketHandlerImpl(_ch, this._config.getPacketListener(), this._config.getStateListener()));
+        _pl.addLast("packet-handler", NcsServerConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch));
     }
 }
