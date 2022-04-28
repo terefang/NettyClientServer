@@ -15,6 +15,13 @@ public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsSer
         super();
     }
 
+    /**
+     * creates a connection from parameters
+     * @param _ch       the netty channel representing the connection
+     * @param address   the peer address
+     * @param port      the peer port
+     * @return          the connection
+     */
     public static NcsConnection from(Channel _ch, InetAddress address, int port)
     {
         NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();
@@ -23,6 +30,11 @@ public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsSer
         return _nc;
     }
 
+    /**
+     * creates a connection from parameters
+     * @param _ch       the netty channel representing the connection
+     * @return          the connection
+     */
     public static NcsConnection from(Channel _ch)
     {
         NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();

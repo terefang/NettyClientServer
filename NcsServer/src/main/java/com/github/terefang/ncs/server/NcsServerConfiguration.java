@@ -1,9 +1,11 @@
 package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.NcsConfiguration;
+import com.github.terefang.ncs.common.security.NcsSslTlsHelper;
 import lombok.Data;
 
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 
 @Data
 public class NcsServerConfiguration extends NcsConfiguration
@@ -20,11 +22,17 @@ public class NcsServerConfiguration extends NcsConfiguration
 
     public SSLEngine getTlsServerEngine()
     {
-        if(getSslEngine()==null && this.isTlsEnabled())
-        {
+        if(!this.isTlsEnabled()) return null;
 
+        System.setProperty("java.security.properties", "java.security.crypto.policy-unlimited");
+
+        if(getSslContext()==null)
+        {
+            this.setSslContext(NcsSslTlsHelper.createSslContext(this));
         }
-        return getSslEngine();
+        SSLParameters _param = NcsSslTlsHelper.createServerSslParameter(this);
+        SSLEngine _engine = NcsSslTlsHelper.createServerSslEngine(this, getSslContext(), _param);
+        return _engine;
     }
 
 }

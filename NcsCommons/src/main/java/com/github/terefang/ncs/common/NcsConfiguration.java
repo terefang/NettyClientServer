@@ -1,12 +1,14 @@
 package com.github.terefang.ncs.common;
 
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
 import lombok.Data;
 import lombok.SneakyThrows;
 
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import java.net.InetAddress;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 
 @Data
 public class NcsConfiguration
@@ -28,7 +30,24 @@ public class NcsConfiguration
     int linger = 0;
 
     SSLEngine sslEngine;
+    SSLContext sslContext;
     boolean tlsEnabled = false;
+    boolean tlsVerifyPeer = false;
+    String tlsFingerprint;
+
+    KeyPair tlsKeypair;
+    X509Certificate tlsCertificate;
+
+    String[] tlsCiphers = {
+            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
+            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
+            "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
+            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA"
+    };
+
+    String[] tlsProtocols = { "TLSv1.2" };
 
     @SneakyThrows
     public void setEndpointAddress(String _s)

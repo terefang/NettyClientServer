@@ -1,6 +1,6 @@
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.server.NcsServerHelper;

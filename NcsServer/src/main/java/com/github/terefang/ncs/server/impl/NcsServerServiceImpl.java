@@ -3,7 +3,7 @@ package com.github.terefang.ncs.server.impl;
 import com.github.terefang.ncs.common.*;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
 import com.github.terefang.ncs.server.NcsServerService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -16,7 +16,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.SneakyThrows;
 
-import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
 
 public class NcsServerServiceImpl implements NcsServerService

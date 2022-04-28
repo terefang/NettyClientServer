@@ -2,7 +2,7 @@ package com.github.terefang.ncs.server.impl;
 
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

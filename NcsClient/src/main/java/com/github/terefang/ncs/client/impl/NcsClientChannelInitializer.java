@@ -20,17 +20,27 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
         this._config = _config;
     }
 
+    /**
+     * initializes the netty pipeline on the given channel for
+     * possible ssl wrap
+     * frame decoding
+     * packet decoding
+     * @param _ch       the channel
+     * @throws Exception
+     */
     @Override
     protected void initChannel(NioSocketChannel _ch) throws Exception
     {
         ChannelPipeline _pl = _ch.pipeline();
 
+        // push a ssl-layer if we have a valid ssl engine
         SSLEngine _engine = this._config.getTlsClientEngine();
         if(_engine!=null)
         {
             _pl.addLast("ssl-tls-layer", new SslHandler(_engine));
         }
 
+        // select a frame format based on max-frame-size
         if(this._config.getMaxFrameLength()>=65536)
         {
             _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));

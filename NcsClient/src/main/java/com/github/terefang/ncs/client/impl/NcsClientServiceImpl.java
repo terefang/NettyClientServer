@@ -4,7 +4,7 @@ import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.client.NcsClientService;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -13,7 +13,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.SneakyThrows;
 
-import javax.net.ssl.SSLEngine;
 import java.util.concurrent.Future;
 
 public class NcsClientServiceImpl implements NcsClientService
@@ -63,6 +62,18 @@ public class NcsClientServiceImpl implements NcsClientService
     @SneakyThrows
     public void shutdown() {
         _workerGroup.shutdownGracefully().sync();
+    }
+
+    @Override
+    public boolean isConnected()
+    {
+        if(_future==null) return false;
+
+        if(_future.channel()==null) return false;
+
+        if(_future.channel().isRegistered()==false) return false;
+
+        return true;
     }
 
     @Override

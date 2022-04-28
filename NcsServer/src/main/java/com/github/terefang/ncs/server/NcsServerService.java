@@ -2,13 +2,11 @@ package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.server.impl.NcsServerServiceImpl;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
-
-import javax.net.ssl.SSLEngine;
 
 public interface NcsServerService
 {

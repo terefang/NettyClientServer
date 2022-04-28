@@ -1,7 +1,7 @@
 package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacketFactory;
 
