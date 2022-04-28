@@ -14,7 +14,7 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 {
     public static String SALT1 = "ac12c1f1-5551-483a-9f71-19dc4f9e3321";
     public static String SALT2 = "8d6b07bf-c4e7-4536-bf9c-20c2bef6db0f";
-    public static int MAC_LEN = 8;
+    public static int MAC_LEN = 2;
     byte[] _pad;
     byte[] _mac;
     public static NcsPskObfCodec from(String _sharedSecret, int _max)

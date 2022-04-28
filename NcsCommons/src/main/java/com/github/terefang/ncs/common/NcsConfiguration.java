@@ -51,6 +51,7 @@ public class NcsConfiguration
 
 
     boolean usePskOBF = false;
+    boolean usePskMac = false;
 
     String pskSharedSecret = "530d07e5-cba8-476b-aed8-0114b8e550d6";
 

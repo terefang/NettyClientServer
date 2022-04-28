@@ -5,6 +5,7 @@ import com.github.terefang.ncs.common.NcsEndpoint;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.NcsPacket;
+import com.github.terefang.ncs.common.pskobf.NcsPskObfCodec;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,6 +20,15 @@ public abstract class NcsConnectionImpl extends SimpleChannelInboundHandler<NcsP
     Channel _channel;
     NcsPacketListener _packetListener;
     NcsStateListener _stateListener;
+    NcsPskObfCodec _codec;
+
+    public NcsPskObfCodec getPskObfCodec() {
+        return _codec;
+    }
+
+    public void setPskObfCodec(NcsPskObfCodec _codec) {
+        this._codec = _codec;
+    }
 
     public void setPeer(NcsEndpoint _peer)
     {

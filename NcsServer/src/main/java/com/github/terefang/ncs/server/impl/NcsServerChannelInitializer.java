@@ -26,6 +26,7 @@ public class NcsServerChannelInitializer extends ChannelInitializer<Channel>
     {
         // server input
         ChannelPipeline _pl = _ch.pipeline();
+        NcsClientConnectionImpl _nc = NcsClientConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch);
 
         SSLEngine _engine = this._config.getTlsServerEngine();
         if(_engine!=null)
@@ -46,7 +47,9 @@ public class NcsServerChannelInitializer extends ChannelInitializer<Channel>
 
         if(this._config.isUsePskOBF() && this._config.getPskSharedSecret()!=null)
         {
-            _pl.addLast("frame-obfuscator", NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength()));
+            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength());
+            _nc.setPskObfCodec(_cdc);
+            _pl.addLast("frame-obfuscator", _cdc);
         }
 
         // server output
@@ -54,6 +57,6 @@ public class NcsServerChannelInitializer extends ChannelInitializer<Channel>
         _pl.addLast("protocol-packet-decoder", new NcsPacketDecoder(this._config.getPacketFactory()));
 
         // pojo codec
-        _pl.addLast("packet-handler", NcsClientConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch));
+        _pl.addLast("packet-handler", _nc);
     }
 }

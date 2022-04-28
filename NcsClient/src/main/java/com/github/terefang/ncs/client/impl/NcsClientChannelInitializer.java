@@ -33,7 +33,7 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
     protected void initChannel(NioSocketChannel _ch) throws Exception
     {
         ChannelPipeline _pl = _ch.pipeline();
-
+        NcsServerConnectionImpl _nc = NcsServerConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch);
         // push a ssl-layer if we have a valid ssl engine
         SSLEngine _engine = this._config.getTlsClientEngine();
         if(_engine!=null)
@@ -55,13 +55,15 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
 
         if(this._config.isUsePskOBF() && this._config.getPskSharedSecret()!=null)
         {
-            _pl.addLast("frame-obfuscator", NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength()));
+            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength());
+            _nc.setPskObfCodec(_cdc);
+            _pl.addLast("frame-obfuscator", _cdc);
         }
 
         _pl.addLast("packet-encoder", new NcsPacketEncoder(this._config.getPacketFactory()));
         _pl.addLast("packet-decoder", new NcsPacketDecoder(this._config.getPacketFactory()));
 
         // pojo codec
-        _pl.addLast("packet-handler", NcsServerConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch));
+        _pl.addLast("packet-handler", _nc);
     }
 }
