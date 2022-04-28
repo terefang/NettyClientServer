@@ -2,21 +2,25 @@ package com.github.terefang.ncs.common.impl;
 
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsEndpoint;
-import com.github.terefang.ncs.common.NcsPacket;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import com.github.terefang.ncs.common.packet.NcsPacket;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
+
+import java.net.InetAddress;
+import java.util.Objects;
 
 public abstract class NcsConnectionImpl implements NcsConnection
 {
-    public NcsConnectionImpl(NcsEndpoint _peer)
+    Object _context;
+    NcsEndpoint _peer;
+    Channel _channel;
+
+    public void setPeer(NcsEndpoint _peer)
     {
         this._peer = _peer;
     }
 
-    Object _context;
-    NcsEndpoint _peer;
-    NioSocketChannel _channel;
-
-    public void setChannel(NioSocketChannel _channel)
+    public void setChannel(Channel _channel)
     {
         this._channel = _channel;
     }
@@ -42,7 +46,34 @@ public abstract class NcsConnectionImpl implements NcsConnection
     }
 
     @Override
-    public NcsEndpoint getPeer() {
+    public NcsEndpoint getPeer()
+    {
+        if((this._peer==null) && (this._channel instanceof SocketChannel))
+        {
+            SocketChannel _sch = (SocketChannel) this._channel;
+            if(_sch.remoteAddress()!=null)
+            {
+                this._peer = NcsEndpoint.from(_sch.remoteAddress());
+            }
+        }
+
+        if(this._peer==null)
+        {
+            return NcsEndpoint.create();
+        }
         return this._peer;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NcsConnectionImpl that = (NcsConnectionImpl) o;
+        return _channel.equals(that._channel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_channel);
     }
 }

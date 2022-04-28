@@ -1,6 +1,6 @@
-package com.github.terefang.ncs.common;
+package com.github.terefang.ncs.common.packet;
 
-import com.github.terefang.ncs.common.NcsPacket;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 

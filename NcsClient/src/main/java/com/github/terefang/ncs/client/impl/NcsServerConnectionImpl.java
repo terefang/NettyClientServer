@@ -4,27 +4,28 @@ import com.github.terefang.ncs.client.NcsServerConnection;
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsEndpoint;
 import com.github.terefang.ncs.common.impl.NcsConnectionImpl;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.channel.Channel;
 
 import java.net.InetAddress;
 
 public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsServerConnection
 {
-    public NcsServerConnectionImpl(NcsEndpoint _peer)
+    public NcsServerConnectionImpl()
     {
-        super(_peer);
+        super();
     }
 
-    public static NcsConnection from(NioSocketChannel _ch, InetAddress address, int port)
+    public static NcsConnection from(Channel _ch, InetAddress address, int port)
     {
-        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl(NcsEndpoint.from(address, port));
+        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();
+        _nc.setPeer(NcsEndpoint.from(address, port));
         _nc.setChannel(_ch);
         return _nc;
     }
 
-    public static NcsConnection from(NioSocketChannel _ch)
+    public static NcsConnection from(Channel _ch)
     {
-        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl(null);
+        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();
         _nc.setChannel(_ch);
         return _nc;
     }

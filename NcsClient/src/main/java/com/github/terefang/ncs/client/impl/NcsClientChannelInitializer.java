@@ -1,14 +1,16 @@
 package com.github.terefang.ncs.client.impl;
 
 import com.github.terefang.ncs.client.NcsClientConfiguration;
-import com.github.terefang.ncs.common.*;
+import com.github.terefang.ncs.common.packet.NcsPacketDecoder;
+import com.github.terefang.ncs.common.packet.NcsPacketEncoder;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.ssl.SslHandler;
 
-import java.nio.channels.SocketChannel;
+import javax.net.ssl.SSLEngine;
 
 public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketChannel>
 {
@@ -22,6 +24,13 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
     protected void initChannel(NioSocketChannel _ch) throws Exception
     {
         ChannelPipeline _pl = _ch.pipeline();
+
+        SSLEngine _engine = this._config.getTlsClientEngine();
+        if(_engine!=null)
+        {
+            _pl.addLast("ssl-tls-layer", new SslHandler(_engine));
+        }
+
         if(this._config.getMaxFrameLength()>=65536)
         {
             _pl.addLast(new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));

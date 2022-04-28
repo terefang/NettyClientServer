@@ -1,8 +1,8 @@
 package com.github.terefang.ncs.client.impl;
 
 import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.NcsPacket;
-import com.github.terefang.ncs.common.NcsPacketListener;
+import com.github.terefang.ncs.common.packet.NcsPacket;
+import com.github.terefang.ncs.common.packet.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;

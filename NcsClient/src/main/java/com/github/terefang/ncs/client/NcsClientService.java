@@ -1,10 +1,14 @@
 package com.github.terefang.ncs.client;
 
 import com.github.terefang.ncs.client.impl.NcsClientServiceImpl;
-import com.github.terefang.ncs.common.NcsPacket;
+import com.github.terefang.ncs.common.packet.NcsPacket;
+import com.github.terefang.ncs.common.packet.NcsPacketFactory;
+import com.github.terefang.ncs.common.packet.NcsPacketListener;
+import com.github.terefang.ncs.common.NcsStateListener;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
 
+import javax.net.ssl.SSLEngine;
 import java.util.concurrent.Future;
 
 public interface NcsClientService
@@ -39,4 +43,16 @@ public interface NcsClientService
 
     void flush();
     void sendAndFlush(NcsPacket _pkt);
+
+    public void setTimeout(int timeout);
+    public void setTcpNoDelay(boolean tcpNoDelay);
+    public void setStateListener(NcsStateListener stateListener);
+    public void setSendBufferSize(int sendBufferSize);
+    public void setRecvBufferSize(int recvBufferSize);
+    public void setPacketListener(NcsPacketListener packetListener);
+    public void setPacketFactory(NcsPacketFactory packetFactory);
+    public void setMaxFrameLength(int maxFrameLength);
+    public void setLinger(int linger);
+    public void setKeepAlive(boolean keepAlive);
+    public void setEndpoint(String _s, int _p);
 }

@@ -1,24 +1,24 @@
 package com.github.terefang.ncs.server.impl;
 
 import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.NcsPacket;
-import com.github.terefang.ncs.common.NcsPacketListener;
+import com.github.terefang.ncs.common.packet.NcsPacket;
+import com.github.terefang.ncs.common.packet.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class NcsServerPacketHandlerImpl extends SimpleChannelInboundHandler<NcsPacket>
 {
     NcsPacketListener _listener;
     NcsStateListener _stateListener;
     NcsConnection _connection;
-    public NcsServerPacketHandlerImpl(NioSocketChannel _ch, NcsPacketListener _listener, NcsStateListener _stateListener)
+    public NcsServerPacketHandlerImpl(Channel _ch, NcsPacketListener _listener, NcsStateListener _stateListener)
     {
         super();
         this._listener = _listener;
         this._stateListener = _stateListener;
-        this._connection = NcsClientConnectionImpl.from(_ch, _ch.remoteAddress().getAddress(), _ch.remoteAddress().getPort());
+        this._connection = NcsClientConnectionImpl.from(_ch);
     }
 
     @Override
