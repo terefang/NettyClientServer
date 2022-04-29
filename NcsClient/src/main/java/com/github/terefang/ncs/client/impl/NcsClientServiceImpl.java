@@ -150,4 +150,5 @@ public class NcsClientServiceImpl implements NcsClientService
         }
     }
 
+    public NcsClientConfiguration getConfiguration() { return this.configuration; }
 }

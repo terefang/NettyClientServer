@@ -20,8 +20,10 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
         // configure simple server
         NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
-        //_svc.setSharedSecret(null);
-        _svc.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        _svc.getConfiguration().setTlsEnabled(true);
+        //_svc.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        //_svc.getConfiguration().setUsePskOBF(false);
+        //_svc.getConfiguration().setUsePskMac(false);
 
         // use optimized linux epoll transport
         _svc.setUseEpoll(true);
@@ -112,12 +114,11 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
         }
 
         public void onError(NcsConnection _connection, Throwable _cause) {
-            System.err.println("ERROR "+_connection.getPeer().asString());
-            _cause.printStackTrace(System.err);
+            System.err.println("ERROR "+_connection.getPeer().asString()+" -- "+_cause.getMessage());
         }
     }
 
-    /** test for commandline -- send 3 pkt with size=1 -- only valid for max-frame<65535
+    /** test for commandline -- send 3 pkt with size=1 -- only valid for max-frame<65535 -- psk=null
 
         echo -e "\x00\x01\x01\x00\x00\x00\x01\x01" | nc -w 3 127.0.0.1 56789 | hexdump -C
 

@@ -7,7 +7,7 @@ import lombok.SneakyThrows;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import java.net.InetAddress;
-import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 
 @Data
@@ -35,7 +35,7 @@ public class NcsConfiguration
     boolean tlsVerifyPeer = false;
     String tlsFingerprint;
 
-    KeyPair tlsKeypair;
+    PrivateKey tlsKey;
     X509Certificate tlsCertificate;
 
     String[] tlsCiphers = {
@@ -48,7 +48,6 @@ public class NcsConfiguration
     };
 
     String[] tlsProtocols = { "TLSv1.2" };
-
 
     boolean usePskOBF = false;
     boolean usePskMac = false;

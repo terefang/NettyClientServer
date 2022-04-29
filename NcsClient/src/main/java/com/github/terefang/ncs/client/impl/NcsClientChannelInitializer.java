@@ -53,12 +53,13 @@ public class NcsClientChannelInitializer extends ChannelInitializer<NioSocketCha
             _pl.addLast(new LengthFieldPrepender(2, false));
         }
 
-        if(this._config.isUsePskOBF() && this._config.getPskSharedSecret()!=null)
+        if((this._config.isUsePskOBF() || this._config.isUsePskMac()) && this._config.getPskSharedSecret()!=null)
         {
-            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength());
+            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength(), this._config.isUsePskOBF(), this._config.isUsePskMac());
             _nc.setPskObfCodec(_cdc);
             _pl.addLast("frame-obfuscator", _cdc);
         }
+
 
         _pl.addLast("packet-encoder", new NcsPacketEncoder(this._config.getPacketFactory()));
         _pl.addLast("packet-decoder", new NcsPacketDecoder(this._config.getPacketFactory()));

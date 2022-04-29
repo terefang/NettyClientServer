@@ -45,9 +45,9 @@ public class NcsServerChannelInitializer extends ChannelInitializer<Channel>
             _pl.addLast("protocol-frame-encoder", new LengthFieldPrepender(2, false));
         }
 
-        if(this._config.isUsePskOBF() && this._config.getPskSharedSecret()!=null)
+        if((this._config.isUsePskOBF() || this._config.isUsePskMac()) && this._config.getPskSharedSecret()!=null)
         {
-            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength());
+            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength(), this._config.isUsePskOBF(), this._config.isUsePskMac());
             _nc.setPskObfCodec(_cdc);
             _pl.addLast("frame-obfuscator", _cdc);
         }

@@ -2,6 +2,7 @@ package com.github.terefang.ncs.common.security;
 
 import com.github.terefang.ncs.common.NcsConfiguration;
 import io.netty.handler.ssl.util.FingerprintTrustManagerFactory;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.SneakyThrows;
 
 import javax.net.ssl.*;
@@ -11,7 +12,13 @@ import java.security.cert.X509Certificate;
 public class NcsSslTlsHelper
 {
     @SneakyThrows
-    public static SSLContext createSslContext(NcsConfiguration _config)
+    public static SelfSignedCertificate createCertificate(String _fqdn)
+    {
+        return new SelfSignedCertificate(_fqdn);
+    }
+
+    @SneakyThrows
+    public static SSLContext createSslContext(NcsConfiguration _config, String _fqdn)
     {
         if(!_config.isTlsEnabled()) return null;
 
@@ -41,17 +48,15 @@ public class NcsSslTlsHelper
         }
 
         SSLContext _sslCtx = SSLContext.getInstance("TLSv1.3");
-
-        if(_config.getTlsCertificate()!=null && _config.getTlsKeypair()!=null)
+        if(_config.getTlsCertificate()==null || _config.getTlsKey()==null)
         {
-            X509ExtendedKeyManager _ekm = NcsX509ExtendedKeyManager.from(_config.getTlsKeypair().getPrivate(), _config.getTlsCertificate(), "default");
+            SelfSignedCertificate _cert = createCertificate(_fqdn);
+            _config.setTlsCertificate(_cert.cert());
+            _config.setTlsKey(_cert.key());
+        }
 
-            _sslCtx.init(new KeyManager[] { _ekm }, _tm, null);
-        }
-        else
-        {
-            _sslCtx.init(new KeyManager[0], _tm, null);
-        }
+        X509ExtendedKeyManager _ekm = NcsX509ExtendedKeyManager.from(_config.getTlsKey(), _config.getTlsCertificate(), "default");
+        _sslCtx.init(new KeyManager[] { _ekm }, _tm, null);
 
         return _sslCtx;
     }

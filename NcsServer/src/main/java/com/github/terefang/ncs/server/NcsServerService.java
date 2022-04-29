@@ -33,6 +33,9 @@ public interface NcsServerService
         return _nss;
     }
 
+
+    public NcsServerConfiguration getConfiguration();
+
     /**
      * create a packet with the registered packet factory
      * @return a packet

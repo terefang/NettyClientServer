@@ -16,8 +16,8 @@ public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
         // create simple server
         NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, _main, _main);
 
-        _client.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
-
+        //_client.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        _client.getConfiguration().setTlsEnabled(true);
         // sync connect
         _client.connectNow();
 
@@ -54,6 +54,6 @@ public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
 
     @Override
     public void onError(NcsConnection _connection, Throwable _cause) {
-        System.err.println("ERROR "+_connection.getPeer().asString());
+        System.err.println("ERROR "+_connection.getPeer().asString()+" -- "+_cause.getMessage());
     }
 }

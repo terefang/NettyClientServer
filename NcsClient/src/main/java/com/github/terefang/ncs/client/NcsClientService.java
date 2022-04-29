@@ -101,6 +101,7 @@ public interface NcsClientService
      */
     boolean isConnected();
 
+    public NcsClientConfiguration getConfiguration();
     /**
      * convenience handler to set config option -- see NcsClientConfiguration for details
      */

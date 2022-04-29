@@ -30,6 +30,10 @@ public class NcsServerServiceImpl implements NcsServerService
         this.configuration = configuration;
     }
 
+    public NcsServerConfiguration getConfiguration() {
+        return configuration;
+    }
+
     @Override
     public NcsPacket createPacket()
     {
@@ -146,10 +150,12 @@ public class NcsServerServiceImpl implements NcsServerService
         if(_s==null)
         {
             this.configuration.setUsePskOBF(false);
+            this.configuration.setUsePskMac(false);
         }
         else
         {
             this.configuration.setUsePskOBF(true);
+            this.configuration.setUsePskMac(true);
         }
     }
 }
