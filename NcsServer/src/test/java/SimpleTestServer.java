@@ -21,12 +21,12 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
         NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
         _svc.getConfiguration().setTlsEnabled(true);
-        //_svc.setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        //_svc.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
         //_svc.getConfiguration().setUsePskOBF(false);
         //_svc.getConfiguration().setUsePskMac(false);
 
         // use optimized linux epoll transport
-        _svc.setUseEpoll(true);
+        _svc.getConfiguration().setUseEpoll(true);
 
         _svc.startNow();
     }

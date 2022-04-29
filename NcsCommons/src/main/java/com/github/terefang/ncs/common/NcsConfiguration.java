@@ -67,4 +67,17 @@ public class NcsConfiguration
         this.endpointAddress = InetAddress.getByName(_s);
         this.endpointPort = _p;
     }
+
+    public void setSharedSecret(String _s)
+    {
+        this.setPskSharedSecret(_s);
+        if(_s==null)
+        {
+            this.setUsePskOBF(false);
+        }
+        else
+        {
+            this.setUsePskOBF(true);
+        }
+    }
 }

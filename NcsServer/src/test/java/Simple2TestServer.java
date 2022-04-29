@@ -21,11 +21,10 @@ public class Simple2TestServer implements NcsPacketListener, NcsStateListener
         // configure simple server
         NcsServerService _svc = NcsServerHelper.createServer(56789, new SimpleBytesNcsPacketFactory(), _main, _main);
 
-        //_svc.setSharedSecret(null);
-        _svc.setSharedSecret("s3cr3t");
+        _svc.getConfiguration().setSharedSecret("s3cr3t");
 
         // use optimized linux epoll transport
-        _svc.setUseEpoll(true);
+        _svc.getConfiguration().setUseEpoll(true);
 
         _svc.startNow();
     }
