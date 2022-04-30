@@ -1,7 +1,7 @@
 package com.github.terefang.ncs.client;
 
 import com.github.terefang.ncs.common.NcsConfiguration;
-import com.github.terefang.ncs.common.security.NcsSslTlsHelper;
+import com.github.terefang.ncs.common.NcsHelper;
 import lombok.SneakyThrows;
 
 import javax.net.ssl.SSLEngine;
@@ -31,10 +31,10 @@ public class NcsClientConfiguration extends NcsConfiguration
 
         if(getSslContext()==null)
         {
-            this.setSslContext(NcsSslTlsHelper.createSslContext(this, InetAddress.getLocalHost().getCanonicalHostName()));
+            this.setSslContext(NcsHelper.createSslContext(this, InetAddress.getLocalHost().getCanonicalHostName()));
         }
-        SSLParameters _param = NcsSslTlsHelper.createClientSslParameter(this);
-        SSLEngine _engine = NcsSslTlsHelper.createClientSslEngine(this, getSslContext(), _param);
+        SSLParameters _param = NcsHelper.createClientSslParameter(this);
+        SSLEngine _engine = NcsHelper.createClientSslEngine(this, getSslContext(), _param);
         return _engine;
     }
 

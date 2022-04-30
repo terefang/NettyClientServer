@@ -11,6 +11,7 @@
         <module>NcsCommons</module>
         <module>NcsClient</module>
         <module>NcsServer</module>
+        <module>NcsLib</module>
     </modules>
 
     <properties>
