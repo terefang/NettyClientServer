@@ -11,6 +11,9 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.List;
 
+/**
+ * will pseudo encrypt/decrypt frames and check for integrity
+ */
 public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
 {
     public static String SALT = "ac12c1f1-5551-483a-9f71-19dc4f9e3321";
@@ -22,6 +25,14 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
     boolean useCRC;
     SecureRandom _rng;
 
+    /**
+     * create thw codec based on the parameters
+     * @param _sharedSecret     a string based shared secret
+     * @param _max              the max frame size
+     * @param _useObf           if frame obfuscation should be used
+     * @param _useCRC           if crc/mac should be used
+     * @return the codec
+     */
     @SneakyThrows
     public static NcsPskObfCodec from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
     {
@@ -34,12 +45,26 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
         return _codec;
     }
 
+    /**
+     * is called from the pipeline to encode (ie. obfuscate) the protocol frame
+     * @param _ctx  the channel
+     * @param _msg  the frame
+     * @param _out  the queue of the pipeline
+     * @throws Exception
+     */
     @Override
     protected void encode(ChannelHandlerContext _ctx, ByteBuf _msg, List<Object> _out) throws Exception {
         ByteBuf _next = obfuscate(_msg, this._pad, this._mac, this.useObf, this.useCRC, this._rng);
         _out.add(_next);
     }
 
+    /**
+     * is called from the pipeline to decode (ie. deobfuscate) the protocol frame
+     * @param _ctx  the channel
+     * @param _msg  the frame
+     * @param _out  the queue of the pipeline
+     * @throws Exception
+     */
     @Override
     protected void decode(ChannelHandlerContext _ctx, ByteBuf _msg, List<Object> _out) throws Exception {
         ByteBuf _next = defuscate(_msg, this._pad, this._mac, this.useObf, this.useCRC, this._rng);
@@ -122,6 +147,11 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
         return _buf;
     }
 
+    /**
+     * CRC table -- https://github.com/ETLCPP/crc-table-generator
+     *
+     * https://stackoverflow.com/questions/44131951/how-to-generate-16-bit-crc-table-from-a-polynomial
+     */
     static int[] CRC_TABLE = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
             0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -157,6 +187,12 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
             0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040,
     };
 
+    /**
+     * calculate crc16 as an integer
+     * @param _start    the start value for the crc (usually 0x0000 or 0x8000)
+     * @param _buffer   the buffer the be crc'd
+     * @return the crc in integer format
+     */
     @SneakyThrows
     public static int crc16i(int _start, byte[] _buffer)
     {
@@ -167,6 +203,12 @@ public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
         return (_crc & 0xffff);
     }
 
+    /**
+     * calculate crc16 as a byte array
+     * @param _start    the start value for the crc (usually 0x0000 or 0x8000)
+     * @param _buffer   the buffer the be crc'd
+     * @return the crc in 2-byte array format
+     */
     public static byte[] crc16(int _start, byte[] _buffer)
     {
         int _crc = crc16i(_start, _buffer);
