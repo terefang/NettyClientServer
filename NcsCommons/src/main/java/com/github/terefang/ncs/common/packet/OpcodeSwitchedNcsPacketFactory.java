@@ -14,6 +14,16 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
 {
     Map<Integer,OpcodeNcsPacketFactory> _registry = new HashMap<>();
 
+    int opcodeSize = 4;
+
+    public int getOpcodeSize() {
+        return opcodeSize;
+    }
+
+    public void setOpcodeSize(int opcodeSize) {
+        this.opcodeSize = opcodeSize;
+    }
+
     /**
      * register a opcode based packet factory
      * @param _f the packet factory
@@ -31,8 +41,16 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
     @Override
     public NcsPacket unpack(ByteBuf _buf)
     {
+        int _opcode = 0 ;
         // we keep the buffer untouched
-        int _opcode = _buf.getInt(0);
+        switch (this.opcodeSize)
+        {
+            case 1: _opcode = _buf.getByte(0); break;
+            case 2: _opcode = _buf.getShort(0); break;
+            case 4: _opcode = _buf.getInt(0); break;
+            default: throw new IllegalArgumentException("illegal opcode size "+this.opcodeSize);
+        }
+
         if(_registry.containsKey(_opcode))
         {
             return _registry.get(_opcode).unpack(_buf);
