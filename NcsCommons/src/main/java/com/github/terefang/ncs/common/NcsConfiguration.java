@@ -55,7 +55,7 @@ public class NcsConfiguration
     String pskSharedSecret = "530d07e5-cba8-476b-aed8-0114b8e550d6";
 
 
-    NcsCompressionMethod compressionMethod;
+    NcsCompressionMethod compressionMethod = NcsCompressionMethod.NONE;
     int compressionMaxLevel = 1;
 
     @SneakyThrows
