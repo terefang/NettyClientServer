@@ -6,7 +6,7 @@
 
     <groupId>com.github.terefang</groupId>
     <artifactId>NettyClientServer</artifactId>
-    <version>2022.4.7</version>
+    <version>2022.4.8</version>
     <modules>
         <module>NcsCommons</module>
         <module>NcsClient</module>
@@ -20,6 +20,7 @@
         <netty.version>4.1.43.Final</netty.version>
         <slf4j.version>1.7.31</slf4j.version>
         <lombok.version>1.18.22</lombok.version>
+        <jackson.version>2.12.3</jackson.version>
     </properties>
 
     <packaging>pom</packaging>

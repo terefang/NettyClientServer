@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.common.packet;
 
+import com.github.terefang.ncs.common.NcsHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.SneakyThrows;
@@ -25,12 +26,22 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
     }
 
     /**
-     * register a opcode based packet factory
+     * register an opcode based packet factory
      * @param _f the packet factory
      */
     public void registerPacketFactory(OpcodeNcsPacketFactory _f)
     {
         _registry.put(_f.getOpcode(), _f);
+    }
+
+    /**
+     * register an opcode based packet factory
+     * @param _opcode the opcode
+     * @param _f the packet factory
+     */
+    public void registerPacketFactory(int _opcode, OpcodeNcsPacketFactory _f)
+    {
+        _registry.put(_opcode, _f);
     }
 
     /**
@@ -47,13 +58,22 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
         {
             case 1: _opcode = _buf.getByte(0) & 0xff; break;
             case 2: _opcode = _buf.getShort(0) & 0xffff; break;
-            case 4: _opcode = _buf.getInt(0); break;
+            case 4: _opcode = _buf.getInt(0) & 0x7fffffff; break;
+            case -1: _opcode = NcsHelper.decodeVarInt128(_buf, 0); break;
             default: throw new IllegalArgumentException("illegal opcode size "+this.opcodeSize);
         }
 
         if(_registry.containsKey(_opcode))
         {
-            return _registry.get(_opcode).unpack(_buf);
+            OpcodeNcsPacketFactory _fact = _registry.get(_opcode);
+            if(_fact.getOpcode()!=_opcode)
+            {
+                return _fact.unpack(_opcode, _buf);
+            }
+            else
+            {
+                return _fact.unpack(_buf);
+            }
         }
         throw new IllegalArgumentException("illegal opcode in packet "+_opcode);
     }

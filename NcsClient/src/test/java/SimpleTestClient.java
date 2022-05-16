@@ -1,13 +1,12 @@
 import com.github.terefang.ncs.client.NcsClientHelper;
 import com.github.terefang.ncs.client.NcsClientService;
 import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import lombok.SneakyThrows;
 
-public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
+public class SimpleTestClient  implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
 {
     @SneakyThrows
     public static void main(String[] args) {
@@ -38,7 +37,8 @@ public class SimpleTestClient  implements NcsPacketListener, NcsStateListener
     }
 
     @Override
-    public void onPacket(NcsConnection _connection, NcsPacket _packet) {
+    public void onPacket(NcsConnection _connection, SimpleBytesNcsPacket _packet)
+    {
         System.err.println("PACKET "+_connection.getPeer().asString());
     }
 

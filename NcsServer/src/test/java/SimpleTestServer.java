@@ -6,7 +6,7 @@ import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 
-public class SimpleTestServer implements NcsPacketListener, NcsStateListener
+public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
 {
     /**
      * create a simple test server
@@ -37,7 +37,7 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
      * @param _packet           the packet
      */
     @Override
-    public void onPacket(NcsConnection _connection, NcsPacket _packet)
+    public void onPacket(NcsConnection _connection, SimpleBytesNcsPacket _packet)
     {
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onPacket(_connection, _packet);
@@ -98,7 +98,7 @@ public class SimpleTestServer implements NcsPacketListener, NcsStateListener
 
     static class SimpleTestServerHandler
     {
-        public void onPacket(NcsConnection _connection, NcsPacket _packet)
+        public void onPacket(NcsConnection _connection, SimpleBytesNcsPacket _packet)
         {
             System.err.println("PACKET "+_connection.getPeer().asString());
         }

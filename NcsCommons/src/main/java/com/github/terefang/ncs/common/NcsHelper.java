@@ -1,6 +1,8 @@
 package com.github.terefang.ncs.common;
 
 import com.github.terefang.ncs.common.security.NcsX509ExtendedKeyManager;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.util.FingerprintTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.SneakyThrows;
@@ -8,6 +10,10 @@ import lombok.SneakyThrows;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -287,4 +293,389 @@ public class NcsHelper
             System.arraycopy(T, 0, _DK, (i - 1) * _hLen, (i == l ? r : _hLen));
         }
     }
+
+    /**
+     * A variable-length unsigned integer using base128 encoding. 1-byte groups
+     * consist of 1-bit flag of continuation and 7-bit value chunk, and are ordered
+     * "most significant group first", i.e. in "big-endian" manner.
+     *
+     * This particular encoding is specified and used in:
+     *
+     * * Standard MIDI file format
+     * * ASN.1 BER encoding
+     * * RAR 5.0 file format
+     *
+     * More information on this encoding is available at
+     * https://en.wikipedia.org/wiki/Variable-length_quantity
+     *
+     * This particular implementation supports serialized values to up 4 bytes long.
+     */
+    public static int decodeVarInt128(ByteBuf _buf, int _index)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 5; _i++)
+        {
+            byte _b = _buf.getByte(_index + _i);
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal opcode in packet (varint)"+_ret);
+    }
+
+    public static int encodeVarInt128(ByteBuf _buf, int _index, int _v)
+    {
+        int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (_v >>> (_i*7)) & 0x7f;
+            _buf.setByte(_index + _j, ((_i>0 ? 0x80 : 0) | _out ));
+        }
+        return _bytes;
+    }
+
+    public static long decodeVarLong128(ByteBuf _buf, int _index)
+    {
+        long _ret = 0;
+        for(int _i = 0; _i < 10; _i++)
+        {
+            byte _b = _buf.getByte(_index + _i);
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal opcode in packet (varlong)"+_ret);
+    }
+
+    public static int encodeVarLong128(ByteBuf _buf, int _index, long _v)
+    {
+        int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (int) ((_v >>> (_i*7)) & 0x7f);
+            _buf.setByte(_index + _j, ((_i>0 ? 0x80 : 0) | _out ));
+        }
+        return _bytes;
+    }
+
+    public static short decodeVarShort128(ByteBuf _buf, int _index)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 3; _i++)
+        {
+            byte _b = _buf.getByte(_index + _i);
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return (short) (_ret & 0xffff);
+            }
+        }
+        throw new IllegalArgumentException("illegal opcode in packet (varint)"+_ret);
+    }
+
+    public static int encodeVarShort128(ByteBuf _buf, int _index, short _v)
+    {
+        if((_v >= (1<<14)) || (_v < 0))
+        {
+            _buf.setByte(_index, (0x80 | ((_v >>> 14) & 0x7f) ));
+            _buf.setByte(_index+1, (0x80 | ((_v >>> 7) & 0x7f) ));
+            _buf.setByte(_index+2, (_v & 0x7f) );
+            return 3;
+        }
+        else
+        if(_v >= (1<<7))
+        {
+            _buf.setByte(_index, (0x80 | ((_v >>> 7) &0x7f) ));
+            _buf.setByte(_index+1, (_v & 0x7f) );
+            return 2;
+        }
+        else
+        {
+            _buf.setByte(_index, (_v & 0x7f) );
+            return 1;
+        }
+    }
+
+    public static int readVarInt128(ByteBuf _buf)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 5; _i++)
+        {
+            byte _b = _buf.readByte();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal varint "+_ret);
+    }
+
+    public static int writeVarInt128(ByteBuf _buf, int _v)
+    {
+        int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (_v >>> (_i*7)) & 0x7f;
+            _buf.writeByte((_i>0 ? 0x80 : 0) | _out );
+        }
+        return _bytes;
+    }
+
+    public static long readVarLong128(ByteBuf _buf)
+    {
+        long _ret = 0;
+        for(int _i = 0; _i < 10; _i++)
+        {
+            byte _b = _buf.readByte();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal varlong"+_ret);
+    }
+
+    public static int writeVarLong128(ByteBuf _buf, long _v)
+    {
+        int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (int) ((_v >>> (_i*7)) & 0x7f);
+            _buf.writeByte((_i>0 ? 0x80 : 0) | _out );
+        }
+        return _bytes;
+    }
+
+    public static short readVarShort128(ByteBuf _buf)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 3; _i++)
+        {
+            byte _b = _buf.readByte();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return (short) (_ret & 0xffff);
+            }
+        }
+        throw new IllegalArgumentException("illegal varshort "+_ret);
+    }
+
+    public static int writeVarShort128(ByteBuf _buf, short _v)
+    {
+        if((_v >= (1<<14)) || (_v < 0))
+        {
+            _buf.writeByte(0x80 | ((_v >>> 14) & 0x7f) );
+            _buf.writeByte(0x80 | ((_v >>> 7) & 0x7f) );
+            _buf.writeByte(_v & 0x7f);
+            return 3;
+        }
+        else
+        if(_v >= (1<<7))
+        {
+            _buf.writeByte(0x80 | ((_v >>> 7) &0x7f) );
+            _buf.writeByte(_v & 0x7f);
+            return 2;
+        }
+        else
+        {
+            _buf.writeByte(_v & 0x7f);
+            return 1;
+        }
+    }
+
+    @SneakyThrows
+    public static int readVarInt128(InputStream _buf)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 5; _i++)
+        {
+            byte _b = (byte) _buf.read();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal varint "+_ret);
+    }
+
+    @SneakyThrows
+    public static int writeVarInt128(OutputStream _buf, int _v)
+    {
+        int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (_v >>> (_i*7)) & 0x7f;
+            _buf.write((_i>0 ? 0x80 : 0) | _out );
+        }
+        return _bytes;
+    }
+
+    @SneakyThrows
+    public static long readVarLong128(InputStream _buf)
+    {
+        long _ret = 0;
+        for(int _i = 0; _i < 10; _i++)
+        {
+            byte _b = (byte) _buf.read();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return _ret;
+            }
+        }
+        throw new IllegalArgumentException("illegal varlong"+_ret);
+    }
+
+    @SneakyThrows
+    public static int writeVarLong128(OutputStream _buf, long _v)
+    {
+        int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
+        for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
+        {
+            int _out = (int) ((_v >>> (_i*7)) & 0x7f);
+            _buf.write((_i>0 ? 0x80 : 0) | _out );
+        }
+        return _bytes;
+    }
+
+    @SneakyThrows
+    public static short readVarShort128(InputStream _buf)
+    {
+        int _ret = 0;
+        for(int _i = 0; _i < 3; _i++)
+        {
+            byte _b = (byte)_buf.read();
+            _ret = (_ret << 7) | (_b & 0x7f);
+            if((_b & 0x80) == 0)
+            {
+                return (short) (_ret & 0xffff);
+            }
+        }
+        throw new IllegalArgumentException("illegal varshort "+_ret);
+    }
+
+    @SneakyThrows
+    public static int writeVarShort128(OutputStream _buf, short _v)
+    {
+        if((_v >= (1<<14)) || (_v < 0))
+        {
+            _buf.write(0x80 | ((_v >>> 14) & 0x7f) );
+            _buf.write(0x80 | ((_v >>> 7) & 0x7f) );
+            _buf.write(_v & 0x7f);
+            return 3;
+        }
+        else
+        if(_v >= (1<<7))
+        {
+            _buf.write(0x80 | ((_v >>> 7) &0x7f) );
+            _buf.write(_v & 0x7f);
+            return 2;
+        }
+        else
+        {
+            _buf.write(_v & 0x7f);
+            return 1;
+        }
+    }
+
+    // from https://stackoverflow.com/questions/6162651/half-precision-floating-point-in-java
+    // ignores the higher 16 bits
+    public static float toFloatFrom16( short hbits )
+    {
+        int mant = hbits & 0x03ff;            // 10 bits mantissa
+        int exp =  hbits & 0x7c00;            // 5 bits exponent
+        if( exp == 0x7c00 )                   // NaN/Inf
+            exp = 0x3fc00;                    // -> NaN/Inf
+        else if( exp != 0 )                   // normalized value
+        {
+            exp += 0x1c000;                   // exp - 15 + 127
+            if( mant == 0 && exp > 0x1c400 )  // smooth transition
+                return Float.intBitsToFloat( ( hbits & 0x8000 ) << 16
+                        | exp << 13 | 0x3ff );
+        }
+        else if( mant != 0 )                  // && exp==0 -> subnormal
+        {
+            exp = 0x1c400;                    // make it normal
+            do {
+                mant <<= 1;                   // mantissa * 2
+                exp -= 0x400;                 // decrease exp by 1
+            } while( ( mant & 0x400 ) == 0 ); // while not normal
+            mant &= 0x3ff;                    // discard subnormal bit
+        }                                     // else +/-0 -> +/-0
+        return Float.intBitsToFloat(          // combine all parts
+                ( hbits & 0x8000 ) << 16          // sign  << ( 31 - 15 )
+                        | ( exp | mant ) << 13 );         // value << ( 23 - 10 )
+    }
+
+    // returns all higher 16 bits as 0 for all results
+    public static short fromFloatTo16( float fval )
+    {
+        int fbits = Float.floatToIntBits( fval );
+        int sign = fbits >>> 16 & 0x8000;          // sign only
+        int val = ( fbits & 0x7fffffff ) + 0x1000; // rounded value
+
+        if( val >= 0x47800000 )               // might be or become NaN/Inf
+        {                                     // avoid Inf due to rounding
+            if( ( fbits & 0x7fffffff ) >= 0x47800000 )
+            {                                 // is or must become NaN/Inf
+                if( val < 0x7f800000 )        // was value but too large
+                    return (short) (sign | 0x7c00);     // make it +/-Inf
+                return (short) (sign | 0x7c00 |        // remains +/-Inf or NaN
+                                        ( fbits & 0x007fffff ) >>> 13); // keep NaN (and Inf) bits
+            }
+            return (short) (sign | 0x7bff);             // unrounded not quite Inf
+        }
+        if( val >= 0x38800000 )               // remains normalized value
+            return (short) (sign | val - 0x38000000 >>> 13); // exp - 127 + 15
+        if( val < 0x33000000 )                // too small for subnormal
+            return (short) sign;                      // becomes +/-0
+        val = ( fbits & 0x7fffffff ) >>> 23;  // tmp exp for subnormal calc
+        return (short) (sign | ( ( fbits & 0x7fffff | 0x800000 ) // add subnormal bit
+                        + ( 0x800000 >>> val - 102 )     // round depending on cut off
+                        >>> 126 - val ));   // div by 2^(1-(exp-127+15)) and >> 13 | exp=0
+    }
+
+    public static float decodeFloat16(ByteBuf _buf, int _index)
+    {
+        return toFloatFrom16(_buf.getShort(_index));
+    }
+
+    public static int encodeFloat16(ByteBuf _buf, int _index, float _v)
+    {
+        _buf.setShort(_index, fromFloatTo16(_v));
+        return 2;
+    }
+
+    public static float readFloat16(ByteBuf _buf)
+    {
+        return toFloatFrom16(_buf.readShort());
+    }
+
+    public static int writeFloat16(ByteBuf _buf, float _v)
+    {
+        _buf.writeShort(fromFloatTo16(_v));
+        return 2;
+    }
+
+    @SneakyThrows
+    public static float readFloat16(DataInputStream _buf)
+    {
+        return toFloatFrom16(_buf.readShort());
+    }
+
+    @SneakyThrows
+    public static int writeFloat16(DataOutputStream _buf, float _v)
+    {
+        _buf.writeShort(fromFloatTo16(_v));
+        return 2;
+    }
+
 }
