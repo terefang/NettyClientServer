@@ -127,6 +127,17 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
     }
 
     /**
+     * encode an int8 into the packet
+     * @param _i
+     */
+    @SneakyThrows
+    public void encodeByte(int _i)
+    {
+        _tempDataOut.writeByte(_i & 0xff);
+        _tempDataOut.flush();
+    }
+
+    /**
      * encode an int32 into the packet
      * @param _i
      */
@@ -317,6 +328,16 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
         byte[] _buf = new byte[NcsHelper.readVarInt128(_tempDataIn)];
         _tempDataIn.read(_buf);
         return _buf;
+    }
+
+    /**
+     * decode an int32 from the packet
+     * @return the int
+     */
+    @SneakyThrows
+    public byte decodeByte()
+    {
+        return _tempDataIn.readByte();
     }
 
     /**
