@@ -13,3 +13,34 @@ See the following classes for example:
 * NcsClient -- client implementation based on netty nio (portable)
 * NcsServer -- server implementation based on netty nio (portable) can be switched to epoll (linux x86_64)
 * NcsLib -- additional classes developers might find useful
+
+## Usage
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.github.terefang.NettyClientServer</groupId>
+        <artifactId>NcsServer</artifactId>
+        <version>${ncs.version}</version>
+    </dependency>
+</dependencies>
+```
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>com.github.terefang.NettyClientServer</groupId>
+        <artifactId>NcsClient</artifactId>
+        <version>${ncs.version}</version>
+    </dependency>
+</dependencies>
+```
