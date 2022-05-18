@@ -29,6 +29,6 @@ public abstract class OpcodedCborPacketFactory<T> extends OpcodeNcsPacketFactory
     }
 
     public OpcodedCborPacket<T> createPacket(Class<T> _clazz) {
-        return new OpcodedCborPacket<T>(_clazz);
+        return new OpcodedCborPacket<T>(this.getOpcode(), _clazz);
     }
 }

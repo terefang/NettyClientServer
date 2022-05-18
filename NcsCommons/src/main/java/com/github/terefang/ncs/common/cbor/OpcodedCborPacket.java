@@ -15,7 +15,9 @@ public class OpcodedCborPacket<T> extends AbstractOpcodeNcsPacket
     Class<T> _typeRef;
 
     @SneakyThrows
-    public OpcodedCborPacket(Class<T> _clazz) {
+    public OpcodedCborPacket(int _code, Class<T> _clazz)
+    {
+        this.setOpcode(_code);
         _typeRef = _clazz;
     }
 

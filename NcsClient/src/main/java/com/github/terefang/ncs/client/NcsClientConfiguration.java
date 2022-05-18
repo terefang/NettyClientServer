@@ -31,7 +31,7 @@ public class NcsClientConfiguration extends NcsConfiguration
 
         if(getSslContext()==null)
         {
-            this.setSslContext(NcsHelper.createSslContext(this, InetAddress.getLocalHost().getCanonicalHostName()));
+            this.setSslContext(NcsHelper.createSslContext(this, InetAddress.getLocalHost().getCanonicalHostName(), null));
         }
         SSLParameters _param = NcsHelper.createClientSslParameter(this);
         SSLEngine _engine = NcsHelper.createClientSslEngine(this, getSslContext(), _param);

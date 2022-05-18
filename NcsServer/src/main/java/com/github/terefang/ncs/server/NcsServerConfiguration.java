@@ -2,6 +2,7 @@ package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.NcsConfiguration;
 import com.github.terefang.ncs.common.NcsHelper;
+import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
 import lombok.Data;
 import lombok.SneakyThrows;
 
@@ -33,11 +34,12 @@ public class NcsServerConfiguration extends NcsConfiguration
 
         if(getSslContext()==null)
         {
-            this.setSslContext(NcsHelper.createSslContext(this, (this.fqdn==null ? InetAddress.getLocalHost().getCanonicalHostName() : this.fqdn)));
+            this.setSslContext(NcsHelper.createSslContext(this, (this.fqdn==null ? InetAddress.getLocalHost().getCanonicalHostName() : this.fqdn), this.clientCertificateVerifier));
         }
         SSLParameters _param = NcsHelper.createServerSslParameter(this);
         SSLEngine _engine = NcsHelper.createServerSslEngine(this, getSslContext(), _param);
         return _engine;
     }
 
+    NcsClientCertificateVerifier clientCertificateVerifier;
 }

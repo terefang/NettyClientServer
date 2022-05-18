@@ -1,0 +1,26 @@
+#
+# X.509 Certificate options
+#
+# DN options
+organization = "org"
+unit = "unit"
+state = "city"
+country = XX
+
+cn = "server.example.com"
+
+expiration_days = 7320
+#activation_date = "2004-02-29 16:21:42"
+#expiration_date = "2030-01-31 12:34:56"
+
+# X.509 v3 extensions
+
+# A dnsname in case of a WWW server.
+dns_name = "www.server.example.com"
+dns_name = "*.server.example.com"
+
+tls_www_server
+tls_www_client
+
+signing_key
+encryption_key

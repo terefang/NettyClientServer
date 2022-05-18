@@ -1,8 +1,9 @@
 package com.github.terefang.ncs.common;
 
+import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
 import com.github.terefang.ncs.common.security.NcsX509ExtendedKeyManager;
+import com.github.terefang.ncs.common.security.NcsX509TrustManager;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.util.FingerprintTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.SneakyThrows;
@@ -14,9 +15,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 
 public class NcsHelper
 {
@@ -27,9 +25,17 @@ public class NcsHelper
     }
 
     @SneakyThrows
-    public static SSLContext createSslContext(NcsConfiguration _config, String _fqdn)
+    public static SSLContext createSslContext(final NcsConfiguration _config, String _fqdn, final NcsClientCertificateVerifier clientCertificateVerifier)
     {
         if(!_config.isTlsEnabled()) return null;
+
+        SSLContext _sslCtx = SSLContext.getInstance("TLSv1.3");
+        if(_config.getTlsCertificate()==null || _config.getTlsKey()==null)
+        {
+            SelfSignedCertificate _cert = createCertificate(_fqdn);
+            _config.setTlsCertificate(_cert.cert());
+            _config.setTlsKey(_cert.key());
+        }
 
         TrustManager[] _tm = null;
         if(_config.isTlsVerifyPeer() && _config.getTlsFingerprint()!=null)
@@ -38,30 +44,7 @@ public class NcsHelper
         }
         else
         {
-            _tm = new X509TrustManager[]{ new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
-                }
-
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-            }};
-        }
-
-        SSLContext _sslCtx = SSLContext.getInstance("TLSv1.3");
-        if(_config.getTlsCertificate()==null || _config.getTlsKey()==null)
-        {
-            SelfSignedCertificate _cert = createCertificate(_fqdn);
-            _config.setTlsCertificate(_cert.cert());
-            _config.setTlsKey(_cert.key());
+            _tm = new X509TrustManager[]{ NcsX509TrustManager.from(_config, clientCertificateVerifier) };
         }
 
         X509ExtendedKeyManager _ekm = NcsX509ExtendedKeyManager.from(_config.getTlsKey(), _config.getTlsCertificate(), "default");
@@ -310,7 +293,7 @@ public class NcsHelper
      *
      * This particular implementation supports serialized values to up 4 bytes long.
      */
-    public static int decodeVarInt128(ByteBuf _buf, int _index)
+    public static int decodeVarUInt128(ByteBuf _buf, int _index)
     {
         int _ret = 0;
         for(int _i = 0; _i < 5; _i++)
@@ -325,7 +308,7 @@ public class NcsHelper
         throw new IllegalArgumentException("illegal opcode in packet (varint)"+_ret);
     }
 
-    public static int encodeVarInt128(ByteBuf _buf, int _index, int _v)
+    public static int encodeVarUInt128(ByteBuf _buf, int _index, int _v)
     {
         int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -336,7 +319,7 @@ public class NcsHelper
         return _bytes;
     }
 
-    public static long decodeVarLong128(ByteBuf _buf, int _index)
+    public static long decodeVarULong128(ByteBuf _buf, int _index)
     {
         long _ret = 0;
         for(int _i = 0; _i < 10; _i++)
@@ -351,7 +334,7 @@ public class NcsHelper
         throw new IllegalArgumentException("illegal opcode in packet (varlong)"+_ret);
     }
 
-    public static int encodeVarLong128(ByteBuf _buf, int _index, long _v)
+    public static int encodeVarULong128(ByteBuf _buf, int _index, long _v)
     {
         int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -362,45 +345,7 @@ public class NcsHelper
         return _bytes;
     }
 
-    public static short decodeVarShort128(ByteBuf _buf, int _index)
-    {
-        int _ret = 0;
-        for(int _i = 0; _i < 3; _i++)
-        {
-            byte _b = _buf.getByte(_index + _i);
-            _ret = (_ret << 7) | (_b & 0x7f);
-            if((_b & 0x80) == 0)
-            {
-                return (short) (_ret & 0xffff);
-            }
-        }
-        throw new IllegalArgumentException("illegal opcode in packet (varint)"+_ret);
-    }
-
-    public static int encodeVarShort128(ByteBuf _buf, int _index, short _v)
-    {
-        if((_v >= (1<<14)) || (_v < 0))
-        {
-            _buf.setByte(_index, (0x80 | ((_v >>> 14) & 0x7f) ));
-            _buf.setByte(_index+1, (0x80 | ((_v >>> 7) & 0x7f) ));
-            _buf.setByte(_index+2, (_v & 0x7f) );
-            return 3;
-        }
-        else
-        if(_v >= (1<<7))
-        {
-            _buf.setByte(_index, (0x80 | ((_v >>> 7) &0x7f) ));
-            _buf.setByte(_index+1, (_v & 0x7f) );
-            return 2;
-        }
-        else
-        {
-            _buf.setByte(_index, (_v & 0x7f) );
-            return 1;
-        }
-    }
-
-    public static int readVarInt128(ByteBuf _buf)
+    public static int readVarUInt128(ByteBuf _buf)
     {
         int _ret = 0;
         for(int _i = 0; _i < 5; _i++)
@@ -415,7 +360,7 @@ public class NcsHelper
         throw new IllegalArgumentException("illegal varint "+_ret);
     }
 
-    public static int writeVarInt128(ByteBuf _buf, int _v)
+    public static int writeVarUInt128(ByteBuf _buf, int _v)
     {
         int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -426,7 +371,7 @@ public class NcsHelper
         return _bytes;
     }
 
-    public static long readVarLong128(ByteBuf _buf)
+    public static long readVarULong128(ByteBuf _buf)
     {
         long _ret = 0;
         for(int _i = 0; _i < 10; _i++)
@@ -441,7 +386,7 @@ public class NcsHelper
         throw new IllegalArgumentException("illegal varlong"+_ret);
     }
 
-    public static int writeVarLong128(ByteBuf _buf, long _v)
+    public static int writeVarULong128(ByteBuf _buf, long _v)
     {
         int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -452,46 +397,8 @@ public class NcsHelper
         return _bytes;
     }
 
-    public static short readVarShort128(ByteBuf _buf)
-    {
-        int _ret = 0;
-        for(int _i = 0; _i < 3; _i++)
-        {
-            byte _b = _buf.readByte();
-            _ret = (_ret << 7) | (_b & 0x7f);
-            if((_b & 0x80) == 0)
-            {
-                return (short) (_ret & 0xffff);
-            }
-        }
-        throw new IllegalArgumentException("illegal varshort "+_ret);
-    }
-
-    public static int writeVarShort128(ByteBuf _buf, short _v)
-    {
-        if((_v >= (1<<14)) || (_v < 0))
-        {
-            _buf.writeByte(0x80 | ((_v >>> 14) & 0x7f) );
-            _buf.writeByte(0x80 | ((_v >>> 7) & 0x7f) );
-            _buf.writeByte(_v & 0x7f);
-            return 3;
-        }
-        else
-        if(_v >= (1<<7))
-        {
-            _buf.writeByte(0x80 | ((_v >>> 7) &0x7f) );
-            _buf.writeByte(_v & 0x7f);
-            return 2;
-        }
-        else
-        {
-            _buf.writeByte(_v & 0x7f);
-            return 1;
-        }
-    }
-
     @SneakyThrows
-    public static int readVarInt128(InputStream _buf)
+    public static int readVarUInt128(InputStream _buf)
     {
         int _ret = 0;
         for(int _i = 0; _i < 5; _i++)
@@ -507,7 +414,7 @@ public class NcsHelper
     }
 
     @SneakyThrows
-    public static int writeVarInt128(OutputStream _buf, int _v)
+    public static int writeVarUInt128(OutputStream _buf, int _v)
     {
         int _bytes = ((32-Integer.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -519,7 +426,7 @@ public class NcsHelper
     }
 
     @SneakyThrows
-    public static long readVarLong128(InputStream _buf)
+    public static long readVarULong128(InputStream _buf)
     {
         long _ret = 0;
         for(int _i = 0; _i < 10; _i++)
@@ -535,7 +442,7 @@ public class NcsHelper
     }
 
     @SneakyThrows
-    public static int writeVarLong128(OutputStream _buf, long _v)
+    public static int writeVarULong128(OutputStream _buf, long _v)
     {
         int _bytes = ((64-Long.numberOfLeadingZeros(_v))/7)+1;
         for(int _i = _bytes-1, _j=0; _i >= 0; _i--,_j++)
@@ -544,46 +451,6 @@ public class NcsHelper
             _buf.write((_i>0 ? 0x80 : 0) | _out );
         }
         return _bytes;
-    }
-
-    @SneakyThrows
-    public static short readVarShort128(InputStream _buf)
-    {
-        int _ret = 0;
-        for(int _i = 0; _i < 3; _i++)
-        {
-            byte _b = (byte)_buf.read();
-            _ret = (_ret << 7) | (_b & 0x7f);
-            if((_b & 0x80) == 0)
-            {
-                return (short) (_ret & 0xffff);
-            }
-        }
-        throw new IllegalArgumentException("illegal varshort "+_ret);
-    }
-
-    @SneakyThrows
-    public static int writeVarShort128(OutputStream _buf, short _v)
-    {
-        if((_v >= (1<<14)) || (_v < 0))
-        {
-            _buf.write(0x80 | ((_v >>> 14) & 0x7f) );
-            _buf.write(0x80 | ((_v >>> 7) & 0x7f) );
-            _buf.write(_v & 0x7f);
-            return 3;
-        }
-        else
-        if(_v >= (1<<7))
-        {
-            _buf.write(0x80 | ((_v >>> 7) &0x7f) );
-            _buf.write(_v & 0x7f);
-            return 2;
-        }
-        else
-        {
-            _buf.write(_v & 0x7f);
-            return 1;
-        }
     }
 
     // from https://stackoverflow.com/questions/6162651/half-precision-floating-point-in-java

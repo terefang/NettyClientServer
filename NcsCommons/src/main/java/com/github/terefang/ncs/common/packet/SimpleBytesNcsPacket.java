@@ -9,6 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Vector;
 
 
 /**
@@ -73,8 +75,22 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      */
     public void startEncoding()
     {
+        startEncoding(0);
+    }
+
+    @SneakyThrows
+    /**
+     * starts a data encoding to build the packet at _offset
+     * @param _offset
+     */
+    public void startEncoding(int _offset)
+    {
         _tempOut = new ByteArrayOutputStream();
         _tempDataOut = new DataOutputStream(_tempOut);
+        if(_offset>0)
+        {
+            _tempDataOut.write(new byte[_offset]);
+        }
     }
 
     /**
@@ -108,7 +124,7 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
     public void encodeVarString(String _s)
     {
         byte[] _c = _s.getBytes(StandardCharsets.UTF_8);
-        NcsHelper.writeVarInt128(_tempDataOut, _c.length);
+        NcsHelper.writeVarUInt128(_tempDataOut, _c.length);
         _tempDataOut.write(_c);
         _tempDataOut.flush();
     }
@@ -131,9 +147,9 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      * @param _i
      */
     @SneakyThrows
-    public void encodeByte(int _i)
+    public void encodeByte(byte _i)
     {
-        _tempDataOut.writeByte(_i & 0xff);
+        _tempDataOut.writeByte(_i);
         _tempDataOut.flush();
     }
 
@@ -153,9 +169,9 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      * @param _i
      */
     @SneakyThrows
-    public void encodeVarInt(int _i)
+    public void encodeVarUInt(int _i)
     {
-        NcsHelper.writeVarInt128(_tempDataOut, _i);
+        NcsHelper.writeVarUInt128(_tempDataOut, _i);
         _tempDataOut.flush();
     }
 
@@ -175,9 +191,9 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      * @param _l
      */
     @SneakyThrows
-    public void encodeVarLong(long _l)
+    public void encodeVarULong(long _l)
     {
-        NcsHelper.writeVarLong128(_tempDataOut, _l);
+        NcsHelper.writeVarULong128(_tempDataOut, _l);
         _tempDataOut.flush();
     }
 
@@ -244,9 +260,51 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
     @SneakyThrows
     public void encodeVarBytes(byte[] _b)
     {
-        NcsHelper.writeVarInt128(_tempDataOut, _b.length);
+        NcsHelper.writeVarUInt128(_tempDataOut, _b.length);
         _tempDataOut.write(_b);
         _tempDataOut.flush();
+    }
+
+    /**
+     * encode a string array into the packet
+     * @param _slist
+     */
+    @SneakyThrows
+    public void encodeStrings(String[] _slist)
+    {
+        encodeVarUInt(_slist.length);
+        for(String _s : _slist)
+        {
+            encodeVarString(_s);
+        }
+    }
+
+    /**
+     * encode an int array into the packet
+     * @param _list
+     */
+    @SneakyThrows
+    public void encodeInts(int[] _list)
+    {
+        encodeVarUInt(_list.length);
+        for(int _i : _list)
+        {
+            encodeInt(_i);
+        }
+    }
+
+    /**
+     * encode a string list into the packet
+     * @param _slist
+     */
+    @SneakyThrows
+    public void encodeStrings(List<String> _slist)
+    {
+        encodeVarUInt(_slist.size());
+        for(String _s : _slist)
+        {
+            encodeVarString(_s);
+        }
     }
 
     ByteArrayInputStream _tempIn;
@@ -257,8 +315,22 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      */
     public void startDecoding()
     {
+        startDecoding(0);
+    }
+
+    /**
+     * starts a data decoding from the packet at _offset
+     * @param _offset
+     */
+    @SneakyThrows
+    public void startDecoding(int _offset)
+    {
         _tempIn = new ByteArrayInputStream(this._buf);
         _tempDataIn = new DataInputStream(_tempIn);
+        if(_offset > 0)
+        {
+            _tempDataIn.skipBytes(_offset);
+        }
     }
 
     /**
@@ -289,9 +361,57 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
     @SneakyThrows
     public String decodeVarString()
     {
-        byte[] _c = new byte[NcsHelper.readVarInt128(_tempDataIn)];
+        byte[] _c = new byte[NcsHelper.readVarUInt128(_tempDataIn)];
         _tempDataIn.read(_c);
         return new String(_c, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * decode a string list from the packet
+     * @return the list
+     */
+    @SneakyThrows
+    public List<String> decodeStringList()
+    {
+        List<String> _ret = new Vector<>();
+        int _len = decodeVarUInt();
+        for(int _i = 0; _i<_len; _i++)
+        {
+            _ret.add(decodeVarString());
+        }
+        return _ret;
+    }
+
+    /**
+     * decode an int32 array from the packet
+     * @return the array
+     */
+    @SneakyThrows
+    public int[] decodeIntArray()
+    {
+        int _len = decodeVarUInt();
+        int[] _ret = new int[_len];
+        for(int _i = 0; _i<_len; _i++)
+        {
+            _ret[_i]= decodeInt();
+        }
+        return _ret;
+    }
+
+    /**
+     * decode a string array from the packet
+     * @return the array
+     */
+    @SneakyThrows
+    public String[] decodeStringArray()
+    {
+        int _len = decodeVarUInt();
+        String[] _ret = new String[_len];
+        for(int _i = 0; _i<_len; _i++)
+        {
+            _ret[_i]=decodeVarString();
+        }
+        return _ret;
     }
 
     /**
@@ -325,7 +445,7 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
     @SneakyThrows
     public byte[] decodeVarBytes()
     {
-        byte[] _buf = new byte[NcsHelper.readVarInt128(_tempDataIn)];
+        byte[] _buf = new byte[NcsHelper.readVarUInt128(_tempDataIn)];
         _tempDataIn.read(_buf);
         return _buf;
     }
@@ -355,9 +475,9 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      * @return the int
      */
     @SneakyThrows
-    public int decodeVarInt()
+    public int decodeVarUInt()
     {
-        return NcsHelper.readVarInt128(_tempDataIn);
+        return NcsHelper.readVarUInt128(_tempDataIn);
     }
 
     /**
@@ -375,9 +495,9 @@ public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
      * @return the long
      */
     @SneakyThrows
-    public long decodeVarLong()
+    public long decodeVarULong()
     {
-        return NcsHelper.readVarLong128(_tempDataIn);
+        return NcsHelper.readVarULong128(_tempDataIn);
     }
 
     /**

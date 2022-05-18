@@ -2,12 +2,15 @@ import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
+import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
+
 @Slf4j
-public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
 {
     /**
      * create a simple test server
@@ -16,10 +19,14 @@ public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>
     public static void main(String[] args) {
 
         // basic acllback handler
-        SimpleTestServer _main = new SimpleTestServer();
+        SimplePskTestServer _main = new SimplePskTestServer();
 
         // configure simple server
         NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
+
+        _svc.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        _svc.getConfiguration().setUsePskOBF(false);
+        _svc.getConfiguration().setUsePskMac(false);
 
         // use optimized linux epoll transport
         _svc.getConfiguration().setUseEpoll(true);
@@ -91,13 +98,4 @@ public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onError(_connection, _cause);
     }
-
-    /** test for commandline -- send 3 pkt with size=1 -- only valid for max-frame<65535 -- psk=null
-
-        echo -e "\x00\x01\x01\x00\x00\x00\x01\x01" | nc -w 3 127.0.0.1 56789 | hexdump -C
-
-            00000000  00 0d 00 00 00 04 48 45  4c 4f 00 00 ff ff 01 00  |......HELO......|
-            00000010  05 00 03 41 43 4b 00 05  00 03 41 43 4b 00 05 00  |...ACK....ACK...|
-            00000020  03 41 43 4b                                       |.ACK|
-     */
 }
