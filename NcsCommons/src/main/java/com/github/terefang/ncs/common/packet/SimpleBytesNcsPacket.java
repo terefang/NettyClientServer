@@ -18,7 +18,7 @@ import java.util.Vector;
  */
 public class SimpleBytesNcsPacket extends AbstractNcsPacket implements NcsPacket
 {
-    byte[] _buf;
+    public byte[] _buf;
 
     /**
      * create a packet

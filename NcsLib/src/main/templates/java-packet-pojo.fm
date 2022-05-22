@@ -1,0 +1,110 @@
+package ${shared.package};
+
+import com.github.terefang.ncs.common.NcsHelper;
+import com.github.terefang.ncs.common.packet.*;
+import com.github.terefang.ncs.lib.packet.*;
+
+import io.netty.buffer.ByteBuf;
+import lombok.SneakyThrows;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Vector;
+
+public class ${name}Packet extends OpcodePojoNcsPacketBase implements NcsPacket
+{
+    public static final int PACKET_OPCODE = ${opcode};
+
+    /**
+     * create a packet
+     * @return the packet
+     */
+    public static ${name}Packet create()
+    {
+        ${name}Packet _pkt = new ${name}Packet();
+        _pkt.setOpcode(${name}Packet.PACKET_OPCODE);
+        return _pkt;
+    }
+
+    /**
+     * create a packet from an array of bytes
+     * @param _buf  byte array
+     * @return the packet
+     */
+    public static ${name}Packet from(byte[] _buf)
+    {
+        ${name}Packet _pkt = ${name}Packet.create();
+        _pkt._buf = new byte[_buf.length];
+        System.arraycopy(_buf, 0, _pkt._buf, 0, _buf.length);
+        return _pkt;
+    }
+
+    /**
+     * create a packet from a buffer of bytes
+     * @param _buf  byte buffer
+     * @return the packet
+     */
+    public static ${name}Packet from(ByteBuf _buf)
+    {
+        ${name}Packet _pkt = ${name}Packet.create();
+        _pkt._buf = new byte[_buf.readableBytes()];
+        _buf.readBytes(_pkt._buf);
+        return _pkt;
+    }
+
+<#list struct?keys as k>
+    <#if _.equalsIgnoreCase(struct[k],'string')>
+        private String ${__.toCamelCase(k, false, '-')} ;
+        public String get${__.toCamelCase(k, true, '-')}() { return this.${__.toCamelCase(k, false, '-')}; }
+        public void set${__.toCamelCase(k, true, '-')}(String _v) { this.${__.toCamelCase(k, false, '-')} = _v; }
+    <#elseif _.equalsIgnoreCase(struct[k],'int') >
+        private int ${__.toCamelCase(k, false, '-')} ;
+        public int get${__.toCamelCase(k, true, '-')}() { return this.${__.toCamelCase(k, false, '-')}; }
+        public void set${__.toCamelCase(k, true, '-')}(int _v) { this.${__.toCamelCase(k, false, '-')} = _v; }
+    <#else>
+        // TODO: unknown type
+        //private ${struct[k]} ${__.toCamelCase(k, false, '-')} ;
+    </#if>
+</#list>
+
+    @Override @SneakyThrows
+    public byte[] serialize()
+    {
+        this.startEncoding();
+        this.encodeInt(this.getOpcode());
+<#list struct?keys as k>
+    <#if _.equalsIgnoreCase(struct[k],'string')>
+        this.encodeVarString(this.${__.toCamelCase(k, false, '-')});
+    <#elseif _.equalsIgnoreCase(struct[k],'int') >
+        this.encodeInt(this.${__.toCamelCase(k, false, '-')});
+    <#else>
+        // TODO: unknown type
+        // encode // ${struct[k]} // ${__.toCamelCase(k, false, '-')}
+    </#if>
+</#list>
+        this.finishEncoding();
+        return super.serialize();
+    }
+
+    @SneakyThrows
+    public void populate()
+    {
+        this.startDecoding();
+        this.setOpcode(this.decodeInt());
+<#list struct?keys as k>
+    <#if _.equalsIgnoreCase(struct[k],'string')>
+        this.${__.toCamelCase(k, false, '-')} = this.decodeVarString();
+    <#elseif _.equalsIgnoreCase(struct[k],'int') >
+        this.${__.toCamelCase(k, false, '-')} = this.encodeInt();
+    <#else>
+        // TODO: unknown type
+        // decode // ${struct[k]} // ${__.toCamelCase(k, false, '-')}
+    </#if>
+</#list>
+        this.finishDecoding();
+    }
+}

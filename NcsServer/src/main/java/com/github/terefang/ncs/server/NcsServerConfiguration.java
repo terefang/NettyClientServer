@@ -1,5 +1,7 @@
 package com.github.terefang.ncs.server;
 
+import com.github.jgonian.ipmath.Ipv4;
+import com.github.jgonian.ipmath.Ipv4Range;
 import com.github.terefang.ncs.common.NcsConfiguration;
 import com.github.terefang.ncs.common.NcsHelper;
 import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
@@ -9,6 +11,7 @@ import lombok.SneakyThrows;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLParameters;
 import java.net.InetAddress;
+import java.util.TreeSet;
 
 @Data
 public class NcsServerConfiguration extends NcsConfiguration
@@ -42,4 +45,29 @@ public class NcsServerConfiguration extends NcsConfiguration
     }
 
     NcsClientCertificateVerifier clientCertificateVerifier;
+
+    TreeSet<Ipv4> bannedAddresses = new TreeSet<>();
+    TreeSet<Ipv4Range> bannedNetworks = new TreeSet<>();
+
+    public void banAddress(String _addr)
+    {
+        this.bannedAddresses.add(Ipv4.of(_addr));
+    }
+
+    public void unbanAddress(String _addr)
+    {
+        this.bannedAddresses.remove(Ipv4.of(_addr));
+    }
+
+    public void banNetwork(String _addr)
+    {
+        this.bannedNetworks.add(Ipv4Range.parse(_addr));
+    }
+
+    public void unbanNetwork(String _addr)
+    {
+        this.bannedNetworks.remove(Ipv4Range.parse(_addr));
+    }
+
+
 }

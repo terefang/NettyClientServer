@@ -1,18 +1,16 @@
 package com.github.terefang.ncs.server.impl;
 
+import com.github.jgonian.ipmath.Ipv4;
+import com.github.jgonian.ipmath.Ipv4Range;
 import com.github.terefang.ncs.common.impl.NcsChannelInitializer;
-import com.github.terefang.ncs.common.packet.NcsPacketDecoder;
-import com.github.terefang.ncs.common.packet.NcsPacketEncoder;
 import com.github.terefang.ncs.common.pskobf.NcsPskObfCodec;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.ssl.SslHandler;
 
 import javax.net.ssl.SSLEngine;
+import java.net.InetSocketAddress;
 
 public class NcsServerChannelInitializer extends NcsChannelInitializer
 {
@@ -26,6 +24,29 @@ public class NcsServerChannelInitializer extends NcsChannelInitializer
 
     protected void initChannel(Channel _ch) throws Exception
     {
+        String _ip = ((InetSocketAddress)_ch.remoteAddress()).getAddress().getHostAddress();
+        Ipv4 _ipv4 = Ipv4.of(_ip);
+        if(_config.getBannedAddresses().size()>0)
+        {
+            if(_config.getBannedAddresses().contains(_ipv4))
+            {
+                _ch.close();
+                return;
+            }
+        }
+
+        if(_config.getBannedNetworks().size()>0)
+        {
+            for(Ipv4Range _net : _config.getBannedNetworks())
+            {
+                if(_net.contains(_ipv4))
+                {
+                    _ch.close();
+                    return;
+                }
+            }
+        }
+
         // server input
         NcsClientConnectionImpl _nc = NcsClientConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch);
 

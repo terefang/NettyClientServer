@@ -5,7 +5,7 @@
     <parent>
         <artifactId>NettyClientServer</artifactId>
         <groupId>com.github.terefang</groupId>
-        <version>2022.5.22</version>
+        <version>2022.5.23</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,5 +16,62 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.terefang.NettyClientServer</groupId>
+            <artifactId>NcsCommons</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+    </dependencies>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </pluginRepository>
+    </pluginRepositories>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.terefang.template</groupId>
+                <artifactId>template-maven-plugin</artifactId>
+                <version>2021.9.373	</version>
+                <executions>
+                    <execution>
+                        <id>extract-packate-pdata</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>freemarker-template</goal>
+                        </goals>
+                        <configuration>
+                            <templateFile>${project.basedir}/src/main/templates/java-packet-pojo.fm</templateFile>
+                            <resourcesDirectory>${project.basedir}/src/main/packets</resourcesDirectory>
+                            <includes>**/*.pdata</includes>
+                            <additionalContext>${project.basedir}/src/main/templates/shared-data.pdata</additionalContext>
+                            <additionalContextRoot>shared</additionalContextRoot>
+                            <resourcesOutput>${project.build.directory}/generated-sources/java</resourcesOutput>
+                            <flattenOutput>false</flattenOutput>
+                            <destinationExtension>.java</destinationExtension>
+                            <outputType>TEXT</outputType>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <compileSourceRoots>
+                        <compileSourceRoot>${project.build.directory}/generated-sources/java</compileSourceRoot>
+                        <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+                    </compileSourceRoots>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
