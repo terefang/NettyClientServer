@@ -4,6 +4,7 @@ import com.github.terefang.ncs.common.*;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import com.github.terefang.ncs.common.NcsPacketListener;
+import com.github.terefang.ncs.server.NcsClientConnection;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
 import com.github.terefang.ncs.server.NcsServerService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -17,6 +18,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.SneakyThrows;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Vector;
 
 public class NcsServerServiceImpl implements NcsServerService
 {
@@ -33,6 +38,8 @@ public class NcsServerServiceImpl implements NcsServerService
     public NcsServerConfiguration getConfiguration() {
         return configuration;
     }
+
+    List<NcsClientConnection> clientConnections = new Vector<NcsClientConnection>();
 
     @Override
     public NcsPacket createPacket()
@@ -81,7 +88,7 @@ public class NcsServerServiceImpl implements NcsServerService
         _tcpBootstrap.childOption(ChannelOption.SO_LINGER, this.configuration.getLinger());
 
         // protocol channel initializer
-        _tcpBootstrap.childHandler(new NcsServerChannelInitializer(this.configuration));
+        _tcpBootstrap.childHandler(new NcsServerChannelInitializer(this, this.configuration));
 
         // start and bind
         _future = _tcpBootstrap.bind();
@@ -91,6 +98,11 @@ public class NcsServerServiceImpl implements NcsServerService
     @Override
     public ChannelFuture stop() {
         return _future.channel().close();
+    }
+
+    @Override
+    public List<NcsClientConnection> listActivePeers() {
+        return Collections.unmodifiableList(this.clientConnections);
     }
 
 }

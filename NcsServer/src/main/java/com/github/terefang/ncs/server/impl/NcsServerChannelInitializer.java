@@ -15,11 +15,13 @@ import java.net.InetSocketAddress;
 public class NcsServerChannelInitializer extends NcsChannelInitializer
 {
     NcsServerConfiguration _config;
+    NcsServerServiceImpl _server;
 
-    public NcsServerChannelInitializer(NcsServerConfiguration _config)
+    public NcsServerChannelInitializer(NcsServerServiceImpl _server, NcsServerConfiguration _config)
     {
         super(_config);
         this._config = _config;
+        this._server = _server;
     }
 
     protected void initChannel(Channel _ch) throws Exception
@@ -48,7 +50,7 @@ public class NcsServerChannelInitializer extends NcsChannelInitializer
         }
 
         // server input
-        NcsClientConnectionImpl _nc = NcsClientConnectionImpl.from(this._config.getPacketListener(), this._config.getStateListener(), _ch);
+        final NcsClientConnectionImpl _nc = NcsClientConnectionImpl.from(this._server, this._config.getPacketListener(), this._config.getStateListener(), _ch);
 
         ChannelPipeline _pl = _ch.pipeline();
 

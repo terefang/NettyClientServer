@@ -1,12 +1,11 @@
 package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.server.impl.NcsServerServiceImpl;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
+
+import java.util.List;
 
 public interface NcsServerService
 {
@@ -72,4 +71,9 @@ public interface NcsServerService
         ((ChannelFuture)stop()).sync();
     }
 
+    /**
+     * returns list of active ppers
+     * @return the list
+     */
+    List<NcsClientConnection> listActivePeers();
 }

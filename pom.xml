@@ -6,7 +6,7 @@
 
     <groupId>com.github.terefang</groupId>
     <artifactId>NettyClientServer</artifactId>
-    <version>2022.5.23</version>
+    <version>2022.5.26</version>
     <modules>
         <module>NcsCommons</module>
         <module>NcsClient</module>
