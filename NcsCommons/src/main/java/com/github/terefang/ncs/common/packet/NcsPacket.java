@@ -3,7 +3,13 @@ package com.github.terefang.ncs.common.packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
-public interface NcsPacket {
+import java.net.InetSocketAddress;
+
+public interface NcsPacket
+{
+    InetSocketAddress getAddress();
+    void setAddress(InetSocketAddress _address);
+
     ByteBuf encodeToBuffer(ByteBufAllocator _alloc);
     ByteBuf encodeToBuffer();
 

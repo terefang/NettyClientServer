@@ -2,14 +2,14 @@ package com.github.terefang.ncs.client.impl;
 
 import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.client.NcsClientService;
+import com.github.terefang.ncs.client.tcp.NcsClientTcpChannelInitializer;
+import com.github.terefang.ncs.client.udp.NcsClientUdpChannelInitializer;
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.SneakyThrows;
 
@@ -30,21 +30,34 @@ public class NcsClientServiceImpl implements NcsClientService
     public Future connect() throws Exception {
         _bootstrap = new Bootstrap();
         _bootstrap.group(_workerGroup);
-        _bootstrap.channel(NioSocketChannel.class);
+        if(configuration.isUseUdp())
+        {
+            _bootstrap.channel(NioDatagramChannel.class);
+            _bootstrap.option(ChannelOption.SO_RCVBUF, this.configuration.getRecvBufferSize());
+            _bootstrap.option(ChannelOption.SO_SNDBUF, this.configuration.getSendBufferSize());
 
-        _bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.configuration.getTimeout());
+            _bootstrap.handler(new NcsClientUdpChannelInitializer(this.configuration));
 
-        _bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-        _bootstrap.option(ChannelOption.SO_RCVBUF, this.configuration.getRecvBufferSize());
+            _future = _bootstrap.connect(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
+        }
+        else
+        {
+            _bootstrap.channel(NioSocketChannel.class);
 
-        _bootstrap.option(ChannelOption.SO_SNDBUF, this.configuration.getSendBufferSize());
-        _bootstrap.option(ChannelOption.TCP_NODELAY, this.configuration.isTcpNoDelay());
-        _bootstrap.option(ChannelOption.SO_KEEPALIVE, this.configuration.isKeepAlive());
-        _bootstrap.option(ChannelOption.SO_LINGER, this.configuration.getLinger());
+            _bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.configuration.getTimeout());
 
-        _bootstrap.handler(new NcsClientChannelInitializer(this.configuration));
+            _bootstrap.option(ChannelOption.SO_REUSEADDR, true);
+            _bootstrap.option(ChannelOption.SO_RCVBUF, this.configuration.getRecvBufferSize());
 
-        _future =  _bootstrap.connect(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
+            _bootstrap.option(ChannelOption.SO_SNDBUF, this.configuration.getSendBufferSize());
+            _bootstrap.option(ChannelOption.TCP_NODELAY, this.configuration.isTcpNoDelay());
+            _bootstrap.option(ChannelOption.SO_KEEPALIVE, this.configuration.isKeepAlive());
+            _bootstrap.option(ChannelOption.SO_LINGER, this.configuration.getLinger());
+
+            _bootstrap.handler(new NcsClientTcpChannelInitializer(this.configuration));
+
+            _future = _bootstrap.connect(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
+        }
         return _future;
     }
 
@@ -78,11 +91,20 @@ public class NcsClientServiceImpl implements NcsClientService
 
     @Override
     public void send(NcsPacket _pkt) {
+        if(_pkt.getAddress()==null)
+        {
+            _pkt.setAddress(configuration.getEndpoint().asInetSocketAddress());
+        }
         _future.channel().write(_pkt);
     }
 
     @Override
-    public void sendAndFlush(NcsPacket _pkt) {
+    public void sendAndFlush(NcsPacket _pkt)
+    {
+        if(_pkt.getAddress()==null)
+        {
+            _pkt.setAddress(configuration.getEndpoint().asInetSocketAddress());
+        }
         _future.channel().writeAndFlush(_pkt);
     }
 

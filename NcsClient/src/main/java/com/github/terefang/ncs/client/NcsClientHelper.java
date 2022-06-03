@@ -68,4 +68,32 @@ public class NcsClientHelper
         return createClient(_server, _port, DEFAULT_MAX_FRAME_LENGTH, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
     }
 
+    /* ----- UDP ----- */
+
+    public static final NcsClientService createSimpleUdpClient(String _server, int _port, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createUdpClient(_server, _port, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
+    }
+
+    public static final NcsClientService createUdpClient(String _server, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        NcsClientConfiguration _config = NcsClientConfiguration.create();
+        // ser to connect to
+        _config.setEndpointAddress(_server);
+        _config.setEndpointPort(_port);
+
+        // reasonable defaults
+        _config.setTimeout(3);
+
+        // factories and listeners
+        _config.setPacketFactory(_factory);
+        _config.setPacketListener(_plistener);
+        _config.setStateListener(_slistenner);
+
+        _config.setUseUdp(true);
+
+        // instantiate
+        return NcsClientService.build(_config);
+    }
+
 }

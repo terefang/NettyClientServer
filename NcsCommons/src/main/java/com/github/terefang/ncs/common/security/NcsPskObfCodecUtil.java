@@ -1,4 +1,4 @@
-package com.github.terefang.ncs.common.pskobf;
+package com.github.terefang.ncs.common.security;
 
 import com.github.terefang.ncs.common.NcsHelper;
 import io.netty.buffer.ByteBuf;
@@ -12,86 +12,11 @@ import java.util.List;
 /**
  * will pseudo encrypt/decrypt frames and check for integrity
  */
-public class NcsPskObfCodec extends MessageToMessageCodec<ByteBuf, ByteBuf>
+public class NcsPskObfCodecUtil
 {
     public static String SALT = "ac12c1f1-5551-483a-9f71-19dc4f9e3321";
     public static int MAC_LEN = 2;
     public static int IV_LEN = 6;
-    byte[] _pad;
-    int _mac;
-    boolean useObf;
-    boolean useCRC;
-    boolean tolerant = true;
-    SecureRandom _rng;
-
-    /**
-     * create thw codec based on the parameters
-     * @param _sharedSecret     a string based shared secret
-     * @param _max              the max frame size
-     * @param _useObf           if frame obfuscation should be used
-     * @param _useCRC           if crc/mac should be used
-     * @return the codec
-     */
-    @SneakyThrows
-    public static NcsPskObfCodec from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
-    {
-        NcsPskObfCodec _codec = new NcsPskObfCodec();
-        _codec._pad = NcsHelper.pbkdf2_sha256(_sharedSecret, SALT, 1<<10, _max);
-        _codec.useObf = _useObf;
-        _codec.useCRC = _useCRC;
-        _codec._mac = NcsHelper.crc16i(0, _codec._pad);
-        _codec._rng = SecureRandom.getInstanceStrong();
-        return _codec;
-    }
-
-    public boolean isTolerant() {
-        return tolerant;
-    }
-
-    public void setTolerant(boolean tolerant) {
-        this.tolerant = tolerant;
-    }
-
-    /**
-     * is called from the pipeline to encode (ie. obfuscate) the protocol frame
-     * @param _ctx  the channel
-     * @param _msg  the frame
-     * @param _out  the queue of the pipeline
-     * @throws Exception
-     */
-    @Override
-    protected void encode(ChannelHandlerContext _ctx, ByteBuf _msg, List<Object> _out) throws Exception
-    {
-        try
-        {
-            ByteBuf _next = obfuscate(_msg, this._pad, this._mac, this.useObf, this.useCRC, this._rng);
-            _out.add(_next);
-        }
-        catch (Exception _xe)
-        {
-            if(!tolerant) throw _xe;
-        }
-    }
-
-    /**
-     * is called from the pipeline to decode (ie. deobfuscate) the protocol frame
-     * @param _ctx  the channel
-     * @param _msg  the frame
-     * @param _out  the queue of the pipeline
-     * @throws Exception
-     */
-    @Override
-    protected void decode(ChannelHandlerContext _ctx, ByteBuf _msg, List<Object> _out) throws Exception {
-        try
-        {
-            ByteBuf _next = defuscate(_msg, this._pad, this._mac, this.useObf, this.useCRC, this._rng);
-            _out.add(_next);
-        }
-        catch (Exception _xe)
-        {
-            if(!tolerant) throw _xe;
-        }
-    }
 
     @SneakyThrows
     public static ByteBuf obfuscate(ByteBuf _src, byte[] _pad, int _mac, boolean _useObf, boolean _useCRC, SecureRandom _rng)

@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 public class NcsPacketDecoder extends MessageToMessageDecoder<ByteBuf>
@@ -19,6 +20,7 @@ public class NcsPacketDecoder extends MessageToMessageDecoder<ByteBuf>
     protected void decode(ChannelHandlerContext _ctx, ByteBuf _buf, List<Object> _list) throws Exception
     {
         NcsPacket _pkt = this._factory.unpack(_buf);
+        _pkt.setAddress((InetSocketAddress) _ctx.channel().remoteAddress());
         _list.add(_pkt);
     }
 }

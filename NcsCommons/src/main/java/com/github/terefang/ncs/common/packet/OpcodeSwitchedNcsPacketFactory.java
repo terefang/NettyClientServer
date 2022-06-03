@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.common.packet;
 
+import com.github.terefang.ncs.common.NcsCodecHelper;
 import com.github.terefang.ncs.common.NcsHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -59,7 +60,7 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
             case 1: _opcode = _buf.getByte(0) & 0xff; break;
             case 2: _opcode = _buf.getShort(0) & 0xffff; break;
             case 4: _opcode = _buf.getInt(0) & 0x7fffffff; break;
-            case -1: _opcode = NcsHelper.decodeVarUInt128(_buf, 0); break;
+            case -1: _opcode = NcsCodecHelper.decodeVarUInt128(_buf, 0); break;
             default: throw new IllegalArgumentException("illegal opcode size "+this.opcodeSize);
         }
 
@@ -101,5 +102,5 @@ public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
 
     @Override
     @SneakyThrows
-    public NcsPacket create() { throw new IllegalAccessException("not implemented"); };
+    public NcsPacket create() { throw new IllegalAccessException("not implemented -- in OpcodeSwitchedNcsPacketFactory"); };
 }

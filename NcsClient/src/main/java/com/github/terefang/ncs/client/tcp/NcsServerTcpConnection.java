@@ -1,18 +1,18 @@
-package com.github.terefang.ncs.client.impl;
+package com.github.terefang.ncs.client.tcp;
 
 import com.github.terefang.ncs.client.NcsServerConnection;
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsEndpoint;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
-import com.github.terefang.ncs.common.impl.NcsConnectionImpl;
+import com.github.terefang.ncs.common.tcp.NcsTcpConnection;
 import io.netty.channel.Channel;
 
 import java.net.InetAddress;
 
-public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsServerConnection
+public class NcsServerTcpConnection extends NcsTcpConnection implements NcsServerConnection
 {
-    public NcsServerConnectionImpl()
+    public NcsServerTcpConnection()
     {
         super();
     }
@@ -24,9 +24,9 @@ public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsSer
      * @param port      the peer port
      * @return          the connection
      */
-    public static NcsConnection from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch, InetAddress address, int port)
+    public static NcsServerTcpConnection from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch, InetAddress address, int port)
     {
-        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();
+        NcsServerTcpConnection _nc = new NcsServerTcpConnection();
         _nc.setPeer(NcsEndpoint.from(address, port));
         _nc.setChannel(_ch);
         _nc.setPacketListener(_pl);
@@ -39,12 +39,17 @@ public class NcsServerConnectionImpl extends NcsConnectionImpl implements NcsSer
      * @param _ch       the netty channel representing the connection
      * @return          the connection
      */
-    public static NcsServerConnectionImpl from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch)
+    public static NcsServerTcpConnection from(NcsPacketListener _pl, NcsStateListener _sl, Channel _ch)
     {
-        NcsServerConnectionImpl _nc = new NcsServerConnectionImpl();
+        NcsServerTcpConnection _nc = new NcsServerTcpConnection();
         _nc.setChannel(_ch);
         _nc.setPacketListener(_pl);
         _nc.setStateListener(_sl);
         return _nc;
+    }
+
+    @Override
+    public boolean isUdp() {
+        return false;
     }
 }

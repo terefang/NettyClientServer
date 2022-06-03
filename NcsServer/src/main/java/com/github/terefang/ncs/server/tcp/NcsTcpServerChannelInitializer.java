@@ -1,10 +1,11 @@
-package com.github.terefang.ncs.server.impl;
+package com.github.terefang.ncs.server.tcp;
 
 import com.github.jgonian.ipmath.Ipv4;
 import com.github.jgonian.ipmath.Ipv4Range;
-import com.github.terefang.ncs.common.impl.NcsChannelInitializer;
-import com.github.terefang.ncs.common.pskobf.NcsPskObfCodec;
+import com.github.terefang.ncs.common.tcp.NcsTcpChannelInitializer;
+import com.github.terefang.ncs.common.security.NcsPskObfTcpCodec;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
+import com.github.terefang.ncs.server.NcsServerServiceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.SslHandler;
@@ -12,12 +13,12 @@ import io.netty.handler.ssl.SslHandler;
 import javax.net.ssl.SSLEngine;
 import java.net.InetSocketAddress;
 
-public class NcsServerChannelInitializer extends NcsChannelInitializer
+public class NcsTcpServerChannelInitializer extends NcsTcpChannelInitializer
 {
     NcsServerConfiguration _config;
     NcsServerServiceImpl _server;
 
-    public NcsServerChannelInitializer(NcsServerServiceImpl _server, NcsServerConfiguration _config)
+    public NcsTcpServerChannelInitializer(NcsServerServiceImpl _server, NcsServerConfiguration _config)
     {
         super(_config);
         this._config = _config;
@@ -50,7 +51,7 @@ public class NcsServerChannelInitializer extends NcsChannelInitializer
         }
 
         // server input
-        final NcsClientConnectionImpl _nc = NcsClientConnectionImpl.from(this._server, this._config.getPacketListener(), this._config.getStateListener(), _ch);
+        final NcsClientTcpConnection _nc = NcsClientTcpConnection.from(this._server, this._config.getPacketListener(), this._config.getStateListener(), _ch);
 
         ChannelPipeline _pl = _ch.pipeline();
 
@@ -59,16 +60,14 @@ public class NcsServerChannelInitializer extends NcsChannelInitializer
         {
             _pl.addLast("ssl-tls-layer", new SslHandler(_engine));
         }
-
         super.initChannel(_ch);
 
         if((this._config.isUsePskOBF() || this._config.isUsePskMac()) && this._config.getPskSharedSecret()!=null)
         {
-            NcsPskObfCodec _cdc = NcsPskObfCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength(), this._config.isUsePskOBF(), this._config.isUsePskMac());
+            NcsPskObfTcpCodec _cdc = NcsPskObfTcpCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength(), this._config.isUsePskOBF(), this._config.isUsePskMac());
             _nc.setPskObfCodec(_cdc);
             _pl.addAfter("protocol-packet-decoder", "frame-obfuscator", _cdc);
         }
-
 
         // pojo codec
         _pl.addLast("packet-handler", _nc);

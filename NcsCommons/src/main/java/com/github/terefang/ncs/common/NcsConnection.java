@@ -39,4 +39,5 @@ public interface NcsConnection
      */
     void sendAndFlush(NcsPacket _pkt);
 
+    boolean isUdp();
 }

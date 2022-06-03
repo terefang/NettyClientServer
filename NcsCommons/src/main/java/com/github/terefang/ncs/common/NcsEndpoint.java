@@ -124,4 +124,13 @@ public class NcsEndpoint
     {
         return getAddressString()+":"+port;
     }
+
+    /**
+     * get the endpoint represented as a InetSocketAddress
+     * @return the endpoint representation
+     */
+    public InetSocketAddress asInetSocketAddress()
+    {
+        return new InetSocketAddress(this.address, this.port);
+    }
 }

@@ -1,7 +1,6 @@
 package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.server.impl.NcsServerServiceImpl;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
 

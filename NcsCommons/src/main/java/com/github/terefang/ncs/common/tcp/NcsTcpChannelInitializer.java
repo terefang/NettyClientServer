@@ -1,26 +1,23 @@
-package com.github.terefang.ncs.common.impl;
+package com.github.terefang.ncs.common.tcp;
 
 import com.github.terefang.ncs.common.NcsCompressionMethod;
 import com.github.terefang.ncs.common.NcsConfiguration;
-import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.packet.NcsPacketDecoder;
 import com.github.terefang.ncs.common.packet.NcsPacketEncoder;
-import com.github.terefang.ncs.common.pskobf.NcsPskObfCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.compression.*;
 
-import java.util.List;
-
-public class NcsChannelInitializer extends ChannelInitializer<Channel> {
+public class NcsTcpChannelInitializer extends ChannelInitializer<Channel> {
 
     private NcsConfiguration _config;
-    public NcsChannelInitializer(NcsConfiguration _config)
+    public NcsTcpChannelInitializer(NcsConfiguration _config)
     {
         super();
         this._config=_config;
@@ -30,6 +27,7 @@ public class NcsChannelInitializer extends ChannelInitializer<Channel> {
     protected void initChannel(Channel _ch) throws Exception
     {
         ChannelPipeline _pl = _ch.pipeline();
+
         if(this._config.getMaxFrameLength()>=65536)
         {
             _pl.addLast("protocol-frame-decoder", new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));
@@ -43,51 +41,54 @@ public class NcsChannelInitializer extends ChannelInitializer<Channel> {
 
         if(!_config.getCompressionMethod().equals(NcsCompressionMethod.NONE))
         {
+            ByteToMessageDecoder _dec = null;
+            MessageToByteEncoder<ByteBuf> _enc = null;
             switch (_config.getCompressionMethod())
             {
                 case BZIP2:
                 {
-                    _pl.addLast("compression-frame-decoder", new Bzip2Decoder());
-                    _pl.addLast("compression-frame-encoder", new Bzip2Encoder(_config.getCompressionMaxLevel()));
+                    _dec = new Bzip2Decoder();
+                    _enc = new Bzip2Encoder(_config.getCompressionMaxLevel());
                     break;
                 }
                 case SNAPPY:
                 {
-                    _pl.addLast("compression-frame-decoder", new SnappyFrameDecoder());
-                    _pl.addLast("compression-frame-encoder", new SnappyFrameEncoder());
+                    _dec = new SnappyFrameDecoder();
+                    _enc = new SnappyFrameEncoder();
                     break;
                 }
                 case FASTLZ:
                 {
-                    _pl.addLast("compression-frame-decoder", new FastLzFrameDecoder(true));
-                    _pl.addLast("compression-frame-encoder", new FastLzFrameEncoder(true));
+                    _dec = new FastLzFrameDecoder(true);
+                    _enc = new FastLzFrameEncoder(true);
                     break;
                 }
                 case LZF:
                 {
-                    _pl.addLast("compression-frame-decoder", new LzfDecoder());
-                    _pl.addLast("compression-frame-encoder", new LzfEncoder());
+                    _dec = new LzfDecoder();
+                    _enc = new LzfEncoder();
                     break;
                 }
                 case LZ4:
                 {
-                    _pl.addLast("compression-frame-decoder", new Lz4FrameDecoder());
-                    _pl.addLast("compression-frame-encoder", new Lz4FrameEncoder());
+                    _dec = new Lz4FrameDecoder();
+                    _enc = new Lz4FrameEncoder();
                     break;
                 }
                 case ZLIB:
                 default:
                 {
-                    _pl.addLast("compression-frame-decoder", new JdkZlibDecoder());
-                    _pl.addLast("compression-frame-encoder", new JdkZlibEncoder(_config.getCompressionMaxLevel()));
+                    _dec = new JdkZlibDecoder();
+                    _enc = new JdkZlibEncoder(_config.getCompressionMaxLevel());
                     break;
                 }
             }
+            _pl.addLast("compression-frame-decoder", _dec);
+            _pl.addLast("compression-frame-encoder", _enc);
         }
 
         // server output
         _pl.addLast("protocol-packet-encoder", new NcsPacketEncoder(this._config.getPacketFactory()));
         _pl.addLast("protocol-packet-decoder", new NcsPacketDecoder(this._config.getPacketFactory()));
-
     }
 }

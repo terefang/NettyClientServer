@@ -4,6 +4,7 @@ import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacketFactory;
+import com.github.terefang.ncs.server.udp.NcsUdpServerConfiguration;
 import lombok.SneakyThrows;
 import sun.security.util.ObjectIdentifier;
 import sun.security.x509.*;
@@ -268,4 +269,35 @@ public class NcsServerHelper
     {
         return _pair.getPrivate().getEncoded();
     }
+
+    // ---- UDP -----
+
+    public static final NcsServerService createSimpleUdpServer(int _port, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        return createUdpServer(null, _port, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
+    }
+
+    public static final NcsServerService createUdpServer(String _local, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    {
+        NcsUdpServerConfiguration _config = NcsUdpServerConfiguration.create();
+        // local address/port to bind to
+        _config.setEndpointAddress(_local);
+        _config.setEndpointPort(_port);
+
+        // protocol frame length! -- no UDP already does framing
+
+        // set reasonable defaults
+        _config.setTimeout(3);
+        _config.setBacklog(100);
+        _config.setWorkers(10);
+
+        // set factories and listeners
+        _config.setPacketFactory(_factory);
+        _config.setPacketListener(_plistener);
+        _config.setStateListener(_slistenner);
+
+        // instantiate
+        return NcsServerService.build(_config);
+    }
+
 }

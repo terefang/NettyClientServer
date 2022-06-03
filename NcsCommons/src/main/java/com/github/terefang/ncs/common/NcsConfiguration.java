@@ -20,6 +20,8 @@ public class NcsConfiguration
     NcsPacketListener packetListener;
     NcsStateListener stateListener;
 
+    boolean useUdp = false;
+
     int timeout = 1<<8;
     int maxFrameLength = 1<<13;
 
@@ -83,6 +85,11 @@ public class NcsConfiguration
      */
     int compressionMaxLevel = 1;
 
+    public NcsEndpoint getEndpoint()
+    {
+        return NcsEndpoint.from(this.endpointAddress, this.endpointPort);
+    }
+
     @SneakyThrows
     public void setEndpointAddress(String _s)
     {
@@ -102,10 +109,12 @@ public class NcsConfiguration
         if(_s==null)
         {
             this.setUsePskOBF(false);
+            this.setUsePskMac(false);
         }
         else
         {
             this.setUsePskOBF(true);
+            this.setUsePskMac(true);
         }
     }
 

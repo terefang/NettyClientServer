@@ -4,8 +4,20 @@ import com.github.terefang.ncs.common.packet.NcsPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
+import java.net.InetSocketAddress;
+
 public abstract class AbstractNcsPacket implements NcsPacket
 {
+    InetSocketAddress address;
+
+    public InetSocketAddress getAddress() {
+        return address;
+    }
+
+    public void setAddress(InetSocketAddress address) {
+        this.address = address;
+    }
+
     @Override
     public ByteBuf encodeToBuffer(ByteBufAllocator _alloc)
     {
