@@ -15,7 +15,7 @@ import java.security.cert.X509Certificate;
 @Data
 public class NcsConfiguration
 {
-    InetAddress endpointAddress;
+    InetAddress endpointAddress = null;
     int endpointPort;
     NcsPacketFactory<AbstractNcsPacket> packetFactory;
     NcsPacketListener packetListener;
@@ -94,13 +94,30 @@ public class NcsConfiguration
     @SneakyThrows
     public void setEndpointAddress(String _s)
     {
-        this.endpointAddress = InetAddress.getByName(_s);
+        if(_s==null)
+        {
+            this.endpointAddress = null;
+        }
+        else
+        if("*".equalsIgnoreCase(_s))
+        {
+            this.endpointAddress = null;
+        }
+        else
+        if("0.0.0.0".equalsIgnoreCase(_s))
+        {
+            this.endpointAddress = null;
+        }
+        else
+        {
+            this.endpointAddress = InetAddress.getByName(_s);
+        }
     }
 
     @SneakyThrows
     public void setEndpoint(String _s, int _p)
     {
-        this.endpointAddress = InetAddress.getByName(_s);
+        setEndpointAddress(_s);
         this.endpointPort = _p;
     }
 

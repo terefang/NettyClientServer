@@ -115,6 +115,8 @@ public class NcsServerServiceImpl implements NcsServerService
                     ? EpollServerSocketChannel.class
                     : NioServerSocketChannel.class);
 
+
+            /*
             // local binding information
             if(this.configuration.getEndpointAddress()==null)
             {
@@ -124,6 +126,7 @@ public class NcsServerServiceImpl implements NcsServerService
             {
                 _tcpBootstrap.localAddress(new InetSocketAddress(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort()));
             }
+            */
 
             // set connection characteristics
             _tcpBootstrap.option(ChannelOption.SO_REUSEADDR, true);
@@ -138,7 +141,14 @@ public class NcsServerServiceImpl implements NcsServerService
             _tcpBootstrap.childHandler(new NcsTcpServerChannelInitializer(this, this.configuration));
 
             // start and bind
-            _future = _tcpBootstrap.bind();
+            if(this.configuration.getEndpointAddress()==null)
+            {
+                _future = _tcpBootstrap.bind(this.configuration.getEndpointPort());
+            }
+            else
+            {
+                _future = _tcpBootstrap.bind(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
+            }
         }
         return _future;
     }
