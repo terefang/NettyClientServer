@@ -8,9 +8,9 @@ import java.util.List;
 
 public class NcsPacketEncoder extends MessageToMessageEncoder<NcsPacket>
 {
-    NcsPacketFactory _factory;
+    NcsPacketFactory<AbstractNcsPacket> _factory;
 
-    public NcsPacketEncoder(NcsPacketFactory _factory) {
+    public NcsPacketEncoder(NcsPacketFactory<AbstractNcsPacket> _factory) {
         super();
         this._factory = _factory;
     }

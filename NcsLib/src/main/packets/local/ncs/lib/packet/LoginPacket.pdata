@@ -1,8 +1,0 @@
-{
-    name = Login
-    opcode = 0
-    struct = {
-        user-name = string
-        pass-word = string
-    }
-}

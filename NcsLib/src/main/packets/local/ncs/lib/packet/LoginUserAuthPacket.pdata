@@ -1,0 +1,10 @@
+{
+    name = LoginUserAuth
+    opcode_domain = 0
+    opcode_category = 1
+    opcode = 1
+    struct = {
+        user-name = string
+        pass-word = string
+    }
+}

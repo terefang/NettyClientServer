@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.common.udp;
 
+import com.github.terefang.ncs.common.packet.AbstractNcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import io.netty.buffer.ByteBuf;
@@ -11,9 +12,9 @@ import java.util.List;
 
 public class NcsUdpPacketEncoder extends MessageToMessageEncoder<NcsPacket>
 {
-    NcsPacketFactory _factory;
+    NcsPacketFactory<AbstractNcsPacket> _factory;
 
-    public NcsUdpPacketEncoder(NcsPacketFactory _factory) {
+    public NcsUdpPacketEncoder(NcsPacketFactory<AbstractNcsPacket> _factory) {
         super();
         this._factory = _factory;
     }

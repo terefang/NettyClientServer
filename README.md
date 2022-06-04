@@ -5,7 +5,7 @@ a demo library that allows sending/receiving encoded packets on client and serve
 See the following classes for example:
 
 * SimpleTestServer
-* SimpleTestClient
+* local.ncs.tcp.SimpleTestClient
 
 ## Libraries
 

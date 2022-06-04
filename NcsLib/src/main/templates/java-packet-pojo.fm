@@ -1,7 +1,8 @@
 package ${shared.package};
 
+import com.github.terefang.ncs.common.NcsCodecHelper;
 import com.github.terefang.ncs.common.NcsHelper;
-import com.github.terefang.ncs.common.packet.*;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.lib.packet.*;
 
 import io.netty.buffer.ByteBuf;
@@ -15,9 +16,26 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Vector;
 
+import com.github.terefang.ncs.common.XUID;
+
 public class ${name}Packet extends OpcodePojoNcsPacketBase implements NcsPacket
 {
+    public static final long PACKET_DOMAIN = ${opcode_domain};
+    public static final int PACKET_CATEGORY = ${opcode_category};
     public static final int PACKET_OPCODE = ${opcode};
+
+    public static class Factory implements OpcodePojoNcsPacketFactoryInterface
+    {
+        @Override
+        public NcsPacket unpack(ByteBuf _buf) {
+            return ${name}Packet.from(_buf);
+        }
+    }
+
+    public static void register(OpcodePojoNcsPacketFactory _reg)
+    {
+        _reg.register(XUID.from(${name}Packet.PACKET_DOMAIN, ${name}Packet.PACKET_CATEGORY, ${name}Packet.PACKET_OPCODE), new Factory());
+    }
 
     /**
      * create a packet
@@ -26,7 +44,7 @@ public class ${name}Packet extends OpcodePojoNcsPacketBase implements NcsPacket
     public static ${name}Packet create()
     {
         ${name}Packet _pkt = new ${name}Packet();
-        _pkt.setOpcode(${name}Packet.PACKET_OPCODE);
+        _pkt.setOpcode(XUID.from(${name}Packet.PACKET_DOMAIN, ${name}Packet.PACKET_CATEGORY, ${name}Packet.PACKET_OPCODE));
         return _pkt;
     }
 
@@ -40,6 +58,7 @@ public class ${name}Packet extends OpcodePojoNcsPacketBase implements NcsPacket
         ${name}Packet _pkt = ${name}Packet.create();
         _pkt._buf = new byte[_buf.length];
         System.arraycopy(_buf, 0, _pkt._buf, 0, _buf.length);
+        _pkt.populate();
         return _pkt;
     }
 
@@ -53,58 +72,61 @@ public class ${name}Packet extends OpcodePojoNcsPacketBase implements NcsPacket
         ${name}Packet _pkt = ${name}Packet.create();
         _pkt._buf = new byte[_buf.readableBytes()];
         _buf.readBytes(_pkt._buf);
+        _pkt.populate();
         return _pkt;
     }
 
 <#list struct?keys as k>
     <#if _.equalsIgnoreCase(struct[k],'string')>
+        // String
         private String ${__.toCamelCase(k, false, '-')} ;
         public String get${__.toCamelCase(k, true, '-')}() { return this.${__.toCamelCase(k, false, '-')}; }
         public void set${__.toCamelCase(k, true, '-')}(String _v) { this.${__.toCamelCase(k, false, '-')} = _v; }
-    <#elseif _.equalsIgnoreCase(struct[k],'int') >
-        private int ${__.toCamelCase(k, false, '-')} ;
-        public int get${__.toCamelCase(k, true, '-')}() { return this.${__.toCamelCase(k, false, '-')}; }
-        public void set${__.toCamelCase(k, true, '-')}(int _v) { this.${__.toCamelCase(k, false, '-')} = _v; }
     <#else>
         // TODO: unknown type
-        //private ${struct[k]} ${__.toCamelCase(k, false, '-')} ;
+        private ${struct[k]} ${__.toCamelCase(k, false, '-')} ;
+        public ${struct[k]} get${__.toCamelCase(k, true, '-')}() { return this.${__.toCamelCase(k, false, '-')}; }
+        public void set${__.toCamelCase(k, true, '-')}(${struct[k]} _v) { this.${__.toCamelCase(k, false, '-')} = _v; }
     </#if>
 </#list>
 
     @Override @SneakyThrows
     public byte[] serialize()
     {
-        this.startEncoding();
-        this.encodeInt(this.getOpcode());
+        ByteArrayOutputStream _baos = new ByteArrayOutputStream();
+        DataOutputStream _daos = new DataOutputStream(_baos);
+        this.getOpcode().writeTo(_daos);
 <#list struct?keys as k>
     <#if _.equalsIgnoreCase(struct[k],'string')>
-        this.encodeVarString(this.${__.toCamelCase(k, false, '-')});
-    <#elseif _.equalsIgnoreCase(struct[k],'int') >
-        this.encodeInt(this.${__.toCamelCase(k, false, '-')});
+        // String
+        NcsCodecHelper.writeVarString(_daos, this.${__.toCamelCase(k, false, '-')});
     <#else>
         // TODO: unknown type
-        // encode // ${struct[k]} // ${__.toCamelCase(k, false, '-')}
+        NcsCodecHelper.write${__.toCamelCase(struct[k], true, '-')}(_daos, this.${__.toCamelCase(k, false, '-')});
     </#if>
 </#list>
-        this.finishEncoding();
-        return super.serialize();
+        _daos.flush();
+        //this._buf = _baos.toByteArray();
+        //return this._buf;
+        return _baos.toByteArray();
     }
 
     @SneakyThrows
     public void populate()
     {
-        this.startDecoding();
-        this.setOpcode(this.decodeInt());
+        ByteArrayInputStream _bais = new ByteArrayInputStream(this._buf);
+        DataInputStream _dais = new DataInputStream(_bais);
+        this.setOpcode(NcsCodecHelper.readXUID(_dais));
 <#list struct?keys as k>
     <#if _.equalsIgnoreCase(struct[k],'string')>
-        this.${__.toCamelCase(k, false, '-')} = this.decodeVarString();
-    <#elseif _.equalsIgnoreCase(struct[k],'int') >
-        this.${__.toCamelCase(k, false, '-')} = this.encodeInt();
+        // String
+        this.${__.toCamelCase(k, false, '-')} = NcsCodecHelper.readVarString(_dais);
     <#else>
         // TODO: unknown type
-        // decode // ${struct[k]} // ${__.toCamelCase(k, false, '-')}
+        this.${__.toCamelCase(k, false, '-')} = NcsCodecHelper.read${__.toCamelCase(struct[k], true, '-')}(_dais);
     </#if>
 </#list>
-        this.finishDecoding();
+        _dais.close();
+        _bais.close();
     }
 }

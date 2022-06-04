@@ -1,7 +1,6 @@
 package com.github.terefang.ncs.common.packet;
 
 import com.github.terefang.ncs.common.NcsCodecHelper;
-import com.github.terefang.ncs.common.NcsHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import lombok.SneakyThrows;
@@ -12,8 +11,7 @@ import java.util.Map;
 /**
  * allows switching packet factories based on initial opcode in the decoding buffer
  */
-public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory
-{
+public class OpcodeSwitchedNcsPacketFactory implements NcsPacketFactory<AbstractNcsPacket> {
     Map<Integer,OpcodeNcsPacketFactory> _registry = new HashMap<>();
 
     int opcodeSize = 4;

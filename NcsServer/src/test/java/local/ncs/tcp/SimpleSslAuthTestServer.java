@@ -1,3 +1,5 @@
+package local.ncs.tcp;
+
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
@@ -5,6 +7,7 @@ import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
+import local.ncs.SimpleTestServerHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;

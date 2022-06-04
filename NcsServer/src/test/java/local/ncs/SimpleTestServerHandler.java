@@ -1,3 +1,5 @@
+package local.ncs;
+
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import lombok.extern.slf4j.Slf4j;

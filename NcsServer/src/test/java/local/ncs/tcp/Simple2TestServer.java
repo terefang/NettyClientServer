@@ -1,16 +1,15 @@
+package local.ncs.tcp;
+
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
-import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
+import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacketFactory;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
-
-@Slf4j
-public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class Simple2TestServer implements NcsPacketListener, NcsStateListener
 {
     /**
      * create a simple test server
@@ -19,14 +18,12 @@ public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPack
     public static void main(String[] args) {
 
         // basic acllback handler
-        SimplePskTestServer _main = new SimplePskTestServer();
+        Simple2TestServer _main = new Simple2TestServer();
 
         // configure simple server
-        NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
+        NcsServerService _svc = NcsServerHelper.createServer(56789, new SimpleBytesNcsPacketFactory(), _main, _main);
 
-        _svc.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
-        _svc.getConfiguration().setUsePskOBF(false);
-        _svc.getConfiguration().setUsePskMac(false);
+        _svc.getConfiguration().setSharedSecret("s3cr3t");
 
         // use optimized linux epoll transport
         _svc.getConfiguration().setUseEpoll(true);
@@ -40,7 +37,7 @@ public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPack
      * @param _packet           the packet
      */
     @Override
-    public void onPacket(NcsConnection _connection, SimpleBytesNcsPacket _packet)
+    public void onPacket(NcsConnection _connection, NcsPacket _packet)
     {
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onPacket(_connection, _packet);
@@ -98,4 +95,35 @@ public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPack
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onError(_connection, _cause);
     }
+
+    static class SimpleTestServerHandler
+    {
+        public void onPacket(NcsConnection _connection, NcsPacket _packet)
+        {
+            System.err.println("PACKET "+_connection.getPeer().asString());
+
+            // packet is decoded via SimpleBytesNcsPacketFactory
+            // so we cast to SimpleBytesNcsPacket
+            SimpleBytesNcsPacket _pkt = _packet.castTo(SimpleBytesNcsPacket.class);
+            _pkt.startDecoding();
+            int opCode = _pkt.decodeInt();
+            _pkt.finishDecoding();
+        }
+
+        public void onConnect(NcsConnection _connection)
+        {
+            System.err.println("CONNECT "+_connection.getPeer().asString());
+        }
+
+        public void onDisconnect(NcsConnection _connection)
+        {
+            System.err.println("DISCONNECT "+_connection.getPeer().asString());
+        }
+
+        public void onError(NcsConnection _connection, Throwable _cause) {
+            System.err.println("ERROR "+_connection.getPeer().asString());
+            _cause.printStackTrace(System.err);
+        }
+    }
+
 }

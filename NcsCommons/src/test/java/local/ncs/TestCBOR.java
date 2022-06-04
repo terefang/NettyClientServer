@@ -1,3 +1,5 @@
+package local.ncs;
+
 import com.github.terefang.ncs.common.cbor.OpcodedCborPacket;
 import com.github.terefang.ncs.common.cbor.OpcodedCborPacketFactory;
 import com.github.terefang.ncs.common.packet.NcsPacket;

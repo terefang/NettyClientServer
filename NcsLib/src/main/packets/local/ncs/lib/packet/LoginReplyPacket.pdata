@@ -1,0 +1,10 @@
+{
+    name = LoginReply
+    opcode_domain = 0
+    opcode_category = 1
+    opcode = 0
+    struct = {
+        success = boolean
+        status = string
+    }
+}

@@ -1,13 +1,9 @@
 package com.github.terefang.ncs.common.packet;
 
-import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.packet.NcsPacketFactory;
-import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
-public class SimpleBytesNcsPacketFactory implements NcsPacketFactory
-{
+public class SimpleBytesNcsPacketFactory implements NcsPacketFactory<AbstractNcsPacket> {
     @Override
     public NcsPacket unpack(ByteBuf _buf)
     {

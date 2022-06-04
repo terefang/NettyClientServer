@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.server;
 
+import com.github.terefang.ncs.common.packet.AbstractNcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
@@ -84,7 +85,7 @@ public class NcsServerHelper
      * @param _slistenner   the callback listener for receiving connection state
      * @return a server-service
      */
-    public static final NcsServerService createServer(int _port, int _maxFrameLength, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsServerService createServer(int _port, int _maxFrameLength, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         return createServer(null, _port, _maxFrameLength, _factory, _plistener, _slistenner);
     }
@@ -97,7 +98,7 @@ public class NcsServerHelper
      * @param _slistenner   the callback listener for receiving connection state
      * @return a server-service
      */
-    public static final NcsServerService createServer(int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsServerService createServer(int _port, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         return createServer(null, _port, DEFAULT_MAX_FRAME_LENGTH, _factory, _plistener, _slistenner);
     }
@@ -111,7 +112,7 @@ public class NcsServerHelper
      * @param _slistenner   the callback listener for receiving connection state
      * @return a server-service
      */
-    public static final NcsServerService createServer(String _local, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsServerService createServer(String _local, int _port, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         return createServer(_local, _port, DEFAULT_MAX_FRAME_LENGTH, _factory, _plistener, _slistenner);
     }
@@ -126,7 +127,7 @@ public class NcsServerHelper
      * @param _slistenner   the callback listener for receiving connection state
      * @return a server-service
      */
-    public static final NcsServerService createServer(String _local, int _port, int _maxFrameLength, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsServerService createServer(String _local, int _port, int _maxFrameLength, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         NcsServerConfiguration _config = NcsServerConfiguration.create();
         // local address/port to bind to
@@ -277,7 +278,7 @@ public class NcsServerHelper
         return createUdpServer(null, _port, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
     }
 
-    public static final NcsServerService createUdpServer(String _local, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsServerService createUdpServer(String _local, int _port, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         NcsUdpServerConfiguration _config = NcsUdpServerConfiguration.create();
         // local address/port to bind to

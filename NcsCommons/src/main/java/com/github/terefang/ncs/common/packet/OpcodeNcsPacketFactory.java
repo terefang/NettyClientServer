@@ -3,8 +3,7 @@ package com.github.terefang.ncs.common.packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 
-public abstract class OpcodeNcsPacketFactory implements NcsPacketFactory
-{
+public abstract class OpcodeNcsPacketFactory implements NcsPacketFactory<AbstractNcsPacket> {
     int opcode;
 
     public int getOpcode() {

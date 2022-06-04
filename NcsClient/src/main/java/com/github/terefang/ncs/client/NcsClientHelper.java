@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.client;
 
+import com.github.terefang.ncs.common.packet.AbstractNcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
@@ -19,7 +20,7 @@ public class NcsClientHelper
      * @param _slistenner   the callback listener for receiving connection state
      * @return a server-service
      */
-    public static final NcsClientService createClient(String _server, int _port, int _maxFrameLength, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsClientService createClient(String _server, int _port, int _maxFrameLength, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         NcsClientConfiguration _config = NcsClientConfiguration.create();
         // ser to connect to
@@ -75,7 +76,7 @@ public class NcsClientHelper
         return createUdpClient(_server, _port, new SimpleBytesNcsPacketFactory(), _plistener, _slistenner);
     }
 
-    public static final NcsClientService createUdpClient(String _server, int _port, NcsPacketFactory _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
+    public static final NcsClientService createUdpClient(String _server, int _port, NcsPacketFactory<AbstractNcsPacket> _factory, NcsPacketListener _plistener, NcsStateListener _slistenner)
     {
         NcsClientConfiguration _config = NcsClientConfiguration.create();
         // ser to connect to

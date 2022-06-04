@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.common;
 
+import com.github.terefang.ncs.common.packet.AbstractNcsPacket;
 import com.github.terefang.ncs.common.packet.NcsPacketFactory;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -16,7 +17,7 @@ public class NcsConfiguration
 {
     InetAddress endpointAddress;
     int endpointPort;
-    NcsPacketFactory packetFactory;
+    NcsPacketFactory<AbstractNcsPacket> packetFactory;
     NcsPacketListener packetListener;
     NcsStateListener stateListener;
 

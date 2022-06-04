@@ -9,9 +9,9 @@ import java.util.List;
 
 public class NcsPacketDecoder extends MessageToMessageDecoder<ByteBuf>
 {
-    NcsPacketFactory _factory;
+    NcsPacketFactory<AbstractNcsPacket> _factory;
 
-    public NcsPacketDecoder(NcsPacketFactory _factory) {
+    public NcsPacketDecoder(NcsPacketFactory<AbstractNcsPacket> _factory) {
         super();
         this._factory = _factory;
     }

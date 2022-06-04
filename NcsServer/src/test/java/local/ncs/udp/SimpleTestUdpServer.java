@@ -1,9 +1,12 @@
+package local.ncs.udp;
+
 import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
+import local.ncs.SimpleTestServerHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
