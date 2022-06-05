@@ -1,4 +1,4 @@
-package com.github.terefang.ncs.common.security;
+package com.github.terefang.ncs.common.security.obf;
 
 import com.github.terefang.ncs.common.NcsHelper;
 import io.netty.buffer.ByteBuf;

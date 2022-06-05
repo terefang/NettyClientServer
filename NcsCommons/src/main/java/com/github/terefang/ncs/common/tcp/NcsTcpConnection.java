@@ -1,11 +1,6 @@
 package com.github.terefang.ncs.common.tcp;
 
 import com.github.terefang.ncs.common.*;
-import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.common.security.NcsPskObfCodec;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 
 import java.util.Objects;

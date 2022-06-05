@@ -31,7 +31,7 @@ public class NcsClientHelper
         _config.setMaxFrameLength(_maxFrameLength);
 
         // reasonable defaults
-        _config.setTimeout(3);
+        _config.setTimeout(3000);
 
         // factories and listeners
         _config.setPacketFactory(_factory);
@@ -84,7 +84,7 @@ public class NcsClientHelper
         _config.setEndpointPort(_port);
 
         // reasonable defaults
-        _config.setTimeout(3);
+        _config.setTimeout(3000);
 
         // factories and listeners
         _config.setPacketFactory(_factory);

@@ -1,7 +1,7 @@
 package com.github.terefang.ncs.client.udp;
 
 import com.github.terefang.ncs.client.NcsClientConfiguration;
-import com.github.terefang.ncs.common.security.NcsPskObfUdpCodec;
+import com.github.terefang.ncs.common.security.obf.NcsPskObfUdpCodec;
 import com.github.terefang.ncs.common.udp.NcsUdpChannelInitializer;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;

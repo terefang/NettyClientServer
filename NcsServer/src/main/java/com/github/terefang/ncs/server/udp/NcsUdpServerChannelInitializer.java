@@ -1,6 +1,6 @@
 package com.github.terefang.ncs.server.udp;
 
-import com.github.terefang.ncs.common.security.NcsPskObfUdpCodec;
+import com.github.terefang.ncs.common.security.obf.NcsPskObfUdpCodec;
 import com.github.terefang.ncs.common.udp.NcsUdpChannelInitializer;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
 import com.github.terefang.ncs.server.NcsServerServiceImpl;

@@ -138,7 +138,7 @@ public class NcsServerHelper
         _config.setMaxFrameLength(_maxFrameLength);
 
         // set reasonable defaults
-        _config.setTimeout(3);
+        _config.setTimeout(3000);
         _config.setBacklog(100);
         _config.setWorkers(10);
 
@@ -288,7 +288,7 @@ public class NcsServerHelper
         // protocol frame length! -- no UDP already does framing
 
         // set reasonable defaults
-        _config.setTimeout(3);
+        _config.setTimeout(3000);
         _config.setBacklog(100);
         _config.setWorkers(10);
 

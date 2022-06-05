@@ -1,4 +1,4 @@
-package com.github.terefang.ncs.common.security;
+package com.github.terefang.ncs.common.security.tls;
 
 import java.math.BigInteger;
 import java.util.Date;

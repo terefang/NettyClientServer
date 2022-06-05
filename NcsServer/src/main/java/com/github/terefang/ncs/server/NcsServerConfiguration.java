@@ -4,7 +4,7 @@ import com.github.jgonian.ipmath.Ipv4;
 import com.github.jgonian.ipmath.Ipv4Range;
 import com.github.terefang.ncs.common.NcsConfiguration;
 import com.github.terefang.ncs.common.NcsHelper;
-import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
+import com.github.terefang.ncs.common.security.tls.NcsClientCertificateVerifier;
 import lombok.Data;
 import lombok.SneakyThrows;
 

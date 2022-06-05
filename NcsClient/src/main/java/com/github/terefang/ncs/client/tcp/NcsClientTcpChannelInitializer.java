@@ -2,7 +2,7 @@ package com.github.terefang.ncs.client.tcp;
 
 import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.common.tcp.NcsTcpChannelInitializer;
-import com.github.terefang.ncs.common.security.NcsPskObfTcpCodec;
+import com.github.terefang.ncs.common.security.obf.NcsPskObfTcpCodec;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.SslHandler;

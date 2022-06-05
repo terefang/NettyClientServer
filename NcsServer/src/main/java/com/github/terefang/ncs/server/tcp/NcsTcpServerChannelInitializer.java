@@ -3,7 +3,7 @@ package com.github.terefang.ncs.server.tcp;
 import com.github.jgonian.ipmath.Ipv4;
 import com.github.jgonian.ipmath.Ipv4Range;
 import com.github.terefang.ncs.common.tcp.NcsTcpChannelInitializer;
-import com.github.terefang.ncs.common.security.NcsPskObfTcpCodec;
+import com.github.terefang.ncs.common.security.obf.NcsPskObfTcpCodec;
 import com.github.terefang.ncs.server.NcsServerConfiguration;
 import com.github.terefang.ncs.server.NcsServerServiceImpl;
 import io.netty.channel.Channel;

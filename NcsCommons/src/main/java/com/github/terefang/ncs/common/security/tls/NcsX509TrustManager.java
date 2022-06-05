@@ -1,4 +1,4 @@
-package com.github.terefang.ncs.common.security;
+package com.github.terefang.ncs.common.security.tls;
 
 import com.github.terefang.ncs.common.NcsConfiguration;
 import lombok.SneakyThrows;

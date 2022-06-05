@@ -44,12 +44,17 @@ public class NcsConfiguration
     X509Certificate[] tlsChain;
 
     String[] tlsCiphers = {
-            "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-            "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256",
+            //"TLS_CHACHA20_POLY1305_SHA256",
+            "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
+            "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
+            "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_DHE_RSA_WITH_AES_256_CBC_SHA256",
             "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
             "TLS_DHE_RSA_WITH_AES_128_CBC_SHA256",
-            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA"
+            "TLS_DHE_RSA_WITH_AES_128_CBC_SHA",
+            "TLS_RSA_WITH_AES_256_CBC_SHA256",
+            "TLS_RSA_WITH_AES_128_CBC_SHA256",
     };
 
     String[] tlsProtocols = { "TLSv1.2" };

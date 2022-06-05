@@ -1,9 +1,8 @@
 package com.github.terefang.ncs.common;
 
-import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
-import com.github.terefang.ncs.common.security.NcsX509ExtendedKeyManager;
-import com.github.terefang.ncs.common.security.NcsX509TrustManager;
-import io.netty.buffer.ByteBuf;
+import com.github.terefang.ncs.common.security.tls.NcsClientCertificateVerifier;
+import com.github.terefang.ncs.common.security.tls.NcsX509ExtendedKeyManager;
+import com.github.terefang.ncs.common.security.tls.NcsX509TrustManager;
 import io.netty.handler.ssl.util.FingerprintTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.SneakyThrows;
@@ -11,10 +10,6 @@ import lombok.SneakyThrows;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.*;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class NcsHelper
 {

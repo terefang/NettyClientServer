@@ -4,7 +4,7 @@ import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
-import com.github.terefang.ncs.common.security.NcsClientCertificateVerifier;
+import com.github.terefang.ncs.common.security.tls.NcsClientCertificateVerifier;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 import local.ncs.SimpleTestServerHandler;
@@ -20,6 +20,8 @@ public class SimpleSslAuthTestServer implements NcsPacketListener<SimpleBytesNcs
      * @param args
      */
     public static void main(String[] args) {
+        System.setProperty("javax.net.debug","all");
+
 
         // basic acllback handler
         SimpleSslAuthTestServer _main = new SimpleSslAuthTestServer();
