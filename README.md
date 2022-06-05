@@ -4,8 +4,13 @@ a demo library that allows sending/receiving encoded packets on client and serve
 
 See the following classes for example:
 
-* SimpleTestServer
+* local.ncs.tcp.SimpleTestServer
 * local.ncs.tcp.SimpleTestClient
+
+## JAVA Version
+
+The library is currently developed and tested with JDK/JRE 8 only, 
+but should run on JDK 9+ if appropriate actions are taken.
 
 ## Libraries
 
@@ -44,3 +49,8 @@ See the following classes for example:
     </dependency>
 </dependencies>
 ```
+
+## Bugs and Issues
+
+If you find a bug, please fix it and send patch to https://github.com/terefang/NettyClientServer/issues
+
