@@ -12,6 +12,10 @@ See the following classes for example:
 The library is currently developed and tested with JDK/JRE 8 only, 
 but should run on JDK 9+ if appropriate actions are taken.
 
+## Compatiblity
+
+The library is not intended for use on GWT, and never will be.
+
 ## Libraries
 
 * NcsCommons -- shared code between client and server implementations
