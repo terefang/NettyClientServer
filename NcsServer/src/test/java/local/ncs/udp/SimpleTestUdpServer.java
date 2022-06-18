@@ -26,6 +26,7 @@ public class SimpleTestUdpServer implements NcsPacketListener<SimpleBytesNcsPack
         NcsServerService _svc = NcsServerHelper.createSimpleUdpServer(56789, _main, _main);
 
         _svc.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        _svc.getConfiguration().setHandleDiscovery(true);
         // use optimized linux epoll transport
         //_svc.getConfiguration().setUseEpoll(true);
 

@@ -3,7 +3,7 @@ package ${shared.package};
 import com.github.terefang.ncs.common.NcsCodecHelper;
 import com.github.terefang.ncs.common.NcsHelper;
 import com.github.terefang.ncs.common.packet.NcsPacket;
-import com.github.terefang.ncs.lib.packet.*;
+import com.github.terefang.ncs.lib.packet.xuidoc.*;
 
 import io.netty.buffer.ByteBuf;
 import lombok.SneakyThrows;

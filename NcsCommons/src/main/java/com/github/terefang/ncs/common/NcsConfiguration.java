@@ -25,6 +25,8 @@ public class NcsConfiguration
 
     int timeout = 1<<8;
     int maxFrameLength = 1<<13;
+    boolean useInt32FrameLength = false;
+    boolean useLeFrameLength = false;
 
     int recvBufferSize = 1<<20;
     int sendBufferSize = 1<<20;

@@ -16,6 +16,11 @@ import java.util.TreeSet;
 @Data
 public class NcsServerConfiguration extends NcsConfiguration
 {
+
+    boolean handleDiscovery = false;
+    String discoveryConnectUrl = null;
+    String discoveryConnectName = null;
+
     public static NcsServerConfiguration create()
     {
         return new NcsServerConfiguration();

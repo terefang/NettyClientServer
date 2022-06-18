@@ -14,6 +14,8 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.compression.*;
 
+import java.nio.ByteOrder;
+
 public class NcsTcpChannelInitializer extends ChannelInitializer<Channel> {
 
     private NcsConfiguration _config;
@@ -28,14 +30,14 @@ public class NcsTcpChannelInitializer extends ChannelInitializer<Channel> {
     {
         ChannelPipeline _pl = _ch.pipeline();
 
-        if(this._config.getMaxFrameLength()>=65536)
+        if(this._config.getMaxFrameLength()>=65536 || this._config.isUseInt32FrameLength())
         {
-            _pl.addLast("protocol-frame-decoder", new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 4, 0, 4));
+            _pl.addLast("protocol-frame-decoder", new LengthFieldBasedFrameDecoder((this._config.isUseLeFrameLength() ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN), this._config.getMaxFrameLength(), 0, 4, 0, 4, true));
             _pl.addLast("protocol-frame-encoder", new LengthFieldPrepender(4, false));
         }
         else
         {
-            _pl.addLast("protocol-frame-decoder", new LengthFieldBasedFrameDecoder(this._config.getMaxFrameLength(), 0, 2, 0, 2));
+            _pl.addLast("protocol-frame-decoder", new LengthFieldBasedFrameDecoder((this._config.isUseLeFrameLength() ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN), this._config.getMaxFrameLength(), 0, 2, 0, 2, true));
             _pl.addLast("protocol-frame-encoder", new LengthFieldPrepender(2, false));
         }
 

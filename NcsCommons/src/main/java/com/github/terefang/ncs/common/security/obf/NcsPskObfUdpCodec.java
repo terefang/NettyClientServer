@@ -1,6 +1,7 @@
 package com.github.terefang.ncs.common.security.obf;
 
 import com.github.terefang.ncs.common.NcsHelper;
+import com.github.terefang.ncs.common.crypto.PBKDF;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
@@ -34,7 +35,7 @@ public class NcsPskObfUdpCodec extends MessageToMessageCodec<DatagramPacket, Dat
     public static NcsPskObfUdpCodec from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
     {
         NcsPskObfUdpCodec _codec = new NcsPskObfUdpCodec();
-        _codec._pad = NcsHelper.pbkdf2_sha256(_sharedSecret, NcsPskObfCodecUtil.SALT, 1<<10, _max);
+        _codec._pad = PBKDF.pbkdf2_sha256(_sharedSecret, NcsPskObfCodecUtil.SALT, 1<<10, _max);
         _codec.useObf = _useObf;
         _codec.useCRC = _useCRC;
         _codec._mac = NcsHelper.crc16i(0, _codec._pad);

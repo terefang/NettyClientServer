@@ -1,6 +1,7 @@
 package com.github.terefang.ncs.common.security.obf;
 
 import com.github.terefang.ncs.common.NcsHelper;
+import com.github.terefang.ncs.common.crypto.PBKDF;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -34,7 +35,7 @@ public class NcsPskObfCodecUtil
 
         if(_useObf)
         {
-            byte[] _tmpPad = NcsHelper.pbkdf2_sha256(_pad, _tmpIV, 1, _tmp.length);
+            byte[] _tmpPad = PBKDF.pbkdf2_sha256(_pad, _tmpIV, 1, _tmp.length);
             for(int _i = 0; _i<_len; _i++)
             {
                 _tmp[_i] = (byte) (_tmp[_i] ^ _tmpPad[_i]);
@@ -73,7 +74,7 @@ public class NcsPskObfCodecUtil
 
         if(_useObf)
         {
-            byte[] _tmpPad = NcsHelper.pbkdf2_sha256(_pad, _tmpIV, 1, _tmp.length);
+            byte[] _tmpPad = PBKDF.pbkdf2_sha256(_pad, _tmpIV, 1, _tmp.length);
 
             for (int _i = 0; _i < _tmp.length; _i++) {
                 _tmp[_i] = (byte) (_tmp[_i] ^ _tmpPad[_i]);

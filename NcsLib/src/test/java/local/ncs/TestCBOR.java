@@ -1,8 +1,8 @@
 package local.ncs;
 
-import com.github.terefang.ncs.common.cbor.OpcodedCborPacket;
-import com.github.terefang.ncs.common.cbor.OpcodedCborPacketFactory;
 import com.github.terefang.ncs.common.packet.NcsPacket;
+import com.github.terefang.ncs.lib.packet.cbor.OpcodedCborPacket;
+import com.github.terefang.ncs.lib.packet.cbor.OpcodedCborPacketFactory;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;

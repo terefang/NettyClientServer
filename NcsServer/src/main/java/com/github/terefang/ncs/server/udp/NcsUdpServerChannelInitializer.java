@@ -37,6 +37,11 @@ public class NcsUdpServerChannelInitializer extends NcsUdpChannelInitializer
 
         _pl.addFirst("ip-filter", NcsUdpFilter.from(_config));
 
+        if(this._config.isHandleDiscovery())
+        {
+            _pl.addAfter("ip-filter", "discover-handler", NcsUdpDiscoveryHandler.from(this._config));
+        }
+
         // pojo codec
         _pl.addLast("packet-handler", _nc);
     }

@@ -3,53 +3,53 @@ package com.github.terefang.ncs.common;
 import com.github.terefang.ncs.common.security.tls.NcsClientCertificateVerifier;
 import com.github.terefang.ncs.common.security.tls.NcsX509ExtendedKeyManager;
 import com.github.terefang.ncs.common.security.tls.NcsX509TrustManager;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.ssl.util.FingerprintTrustManagerFactory;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import lombok.SneakyThrows;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
-public class NcsHelper
-{
+public class NcsHelper {
+    public static long SPECIAL_PACKET_ID = -1L;
+    public static long DISCOVERY_PACKET_ID = 0x444953434f564552L;
+    public static long FOUND_PACKET_ID = 0x464f554e4400L;
+    public static long FOUND_WITH_URL_PACKET_ID = 0x464f554e4401L;
+
     @SneakyThrows
-    public static SelfSignedCertificate createCertificate(String _fqdn)
-    {
+    public static SelfSignedCertificate createCertificate(String _fqdn) {
         return new SelfSignedCertificate(_fqdn);
     }
 
     @SneakyThrows
-    public static SSLContext createSslContext(final NcsConfiguration _config, String _fqdn, final NcsClientCertificateVerifier clientCertificateVerifier)
-    {
-        if(!_config.isTlsEnabled()) return null;
+    public static SSLContext createSslContext(final NcsConfiguration _config, String _fqdn, final NcsClientCertificateVerifier clientCertificateVerifier) {
+        if (!_config.isTlsEnabled()) return null;
 
         SSLContext _sslCtx = SSLContext.getInstance("TLSv1.3");
-        if(_config.getTlsCertificate()==null || _config.getTlsKey()==null)
-        {
+        if (_config.getTlsCertificate() == null || _config.getTlsKey() == null) {
             SelfSignedCertificate _cert = createCertificate(_fqdn);
             _config.setTlsCertificate(_cert.cert());
             _config.setTlsKey(_cert.key());
         }
 
         TrustManager[] _tm = null;
-        if(_config.isTlsVerifyPeer() && _config.getTlsFingerprint()!=null)
-        {
-            _tm = new FingerprintTrustManagerFactory(_config.getTlsFingerprint()).getTrustManagers() ;
-        }
-        else
-        {
-            _tm = new X509TrustManager[]{ NcsX509TrustManager.from(_config, clientCertificateVerifier) };
+        if (_config.isTlsVerifyPeer() && _config.getTlsFingerprint() != null) {
+            _tm = new FingerprintTrustManagerFactory(_config.getTlsFingerprint()).getTrustManagers();
+        } else {
+            _tm = new X509TrustManager[]{NcsX509TrustManager.from(_config, clientCertificateVerifier)};
         }
 
         X509ExtendedKeyManager _ekm = NcsX509ExtendedKeyManager.from(_config.getTlsKey(), _config.getTlsCertificate(), "default");
-        _sslCtx.init(new KeyManager[] { _ekm }, _tm, null);
+        _sslCtx.init(new KeyManager[]{_ekm}, _tm, null);
 
         return _sslCtx;
     }
 
-    public static SSLParameters createClientSslParameter(NcsConfiguration _config)
-    {
+    public static SSLParameters createClientSslParameter(NcsConfiguration _config) {
         SSLParameters _param = new SSLParameters();
         _param.setNeedClientAuth(false);
         _param.setWantClientAuth(false);
@@ -58,19 +58,16 @@ public class NcsHelper
         return _param;
     }
 
-    public static SSLEngine createClientSslEngine(NcsConfiguration _config, SSLContext _ctx, SSLParameters _param)
-    {
+    public static SSLEngine createClientSslEngine(NcsConfiguration _config, SSLContext _ctx, SSLParameters _param) {
         SSLEngine _engine = _ctx.createSSLEngine();
         _engine.setUseClientMode(true);
         _engine.setSSLParameters(_param);
         return _engine;
     }
 
-    public static SSLParameters createServerSslParameter(NcsConfiguration _config)
-    {
+    public static SSLParameters createServerSslParameter(NcsConfiguration _config) {
         SSLParameters _param = new SSLParameters();
-        if(_config.isTlsVerifyPeer())
-        {
+        if (_config.isTlsVerifyPeer()) {
             _param.setNeedClientAuth(true);
             _param.setWantClientAuth(true);
         }
@@ -79,8 +76,7 @@ public class NcsHelper
         return _param;
     }
 
-    public static SSLEngine createServerSslEngine(NcsConfiguration _config, SSLContext _ctx, SSLParameters _param)
-    {
+    public static SSLEngine createServerSslEngine(NcsConfiguration _config, SSLContext _ctx, SSLParameters _param) {
         SSLEngine _engine = _ctx.createSSLEngine();
         _engine.setUseClientMode(false);
         _engine.setSSLParameters(_param);
@@ -89,28 +85,28 @@ public class NcsHelper
 
     /**
      * CRC table -- CRC-16-IBM; also known as CRC-16 and CRC-16-ANSI; poly = 0x8005
-     *
+     * <p>
      * https://en.wikipedia.org/wiki/Cyclic_redundancy_check
-     *
+     * <p>
      * https://github.com/ETLCPP/crc-table-generator
-     *
+     * <p>
      * BUT NOT CRC-16-CCITT; known as CRC-CCITT; poly = 0x1021
-     *
+     * <p>
      * // initialize static lookup table
-     * 		for (int i = 0; i < 256; i++)
-     * 		{
-     * 			int crc = i << 8;
-     * 			for (int j = 0; j < 8; j++)
-     * 			{
-     * 				if ((crc & 0x8000) == 0x8000)
-     * 				{
-     * 					crc = (crc << 1) ^ poly;
-     *              } else {
-     * 					crc = (crc << 1);
-     *              }
-     *          }
-     * 			table[i] = crc & 0xffff;
-     *      }
+     * for (int i = 0; i < 256; i++)
+     * {
+     * int crc = i << 8;
+     * for (int j = 0; j < 8; j++)
+     * {
+     * if ((crc & 0x8000) == 0x8000)
+     * {
+     * crc = (crc << 1) ^ poly;
+     * } else {
+     * crc = (crc << 1);
+     * }
+     * }
+     * table[i] = crc & 0xffff;
+     * }
      */
     static int[] CRC_TABLE = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -149,13 +145,13 @@ public class NcsHelper
 
     /**
      * calculate crc16 as an integer
-     * @param _start    the start value for the crc (usually 0x0000 or 0x8000)
-     * @param _buffer   the buffer the be crc'd
+     *
+     * @param _start  the start value for the crc (usually 0x0000 or 0x8000)
+     * @param _buffer the buffer the be crc'd
      * @return the crc in integer format
      */
     @SneakyThrows
-    public static int crc16i(int _start, byte[] _buffer)
-    {
+    public static int crc16i(int _start, byte[] _buffer) {
         int _crc = _start;
         for (byte _b : _buffer) {
             _crc = (_crc >>> 8) ^ CRC_TABLE[(_crc ^ _b) & 0xff];
@@ -167,166 +163,161 @@ public class NcsHelper
     public static final String HMAC_SHA1 = "HmacSHA1";
     public static final String HMAC_SHA256 = "HmacSHA256";
     public static final String HMAC_SHA512 = "HmacSHA512";
+
     /**
      * calculate crc16 as a byte array
-     * @param _start    the start value for the crc (usually 0x0000 or 0x8000)
-     * @param _buffer   the buffer the be crc'd
+     *
+     * @param _start  the start value for the crc (usually 0x0000 or 0x8000)
+     * @param _buffer the buffer the be crc'd
      * @return the crc in 2-byte array format
      */
-    public static byte[] crc16(int _start, byte[] _buffer)
-    {
+    public static byte[] crc16(int _start, byte[] _buffer) {
         int _crc = crc16i(_start, _buffer);
-        return new byte[] { (byte)(_crc & 0xff), (byte)((_crc >>> 8) & 0xff) };
-    }
-
-    /**
-     * derive a key from password and salt using hmac-sha256
-     * @param _Password         the password
-     * @param _Salt             the salt
-     * @param _counter          hash counter (ie. strength)
-     * @param _derivedKeyLen    length of derived key
-     * @return                  a key
-     */
-    public static byte[] pbkdf2_sha256(String _Password, String _Salt, int _counter, int _derivedKeyLen)
-    {
-        return pbkdf2( HMAC_SHA256, _Password.getBytes(), _Salt.getBytes(), _counter, _derivedKeyLen);
-    }
-
-    /**
-     * derive a key from password and salt using hmac-sha256
-     * @param _Password         the password
-     * @param _Salt             the salt
-     * @param _counter          hash counter (ie. strength)
-     * @param _derivedKeyLen    length of derived key
-     * @return                  a key
-     */
-    public static byte[] pbkdf2_sha256(byte[] _Password, byte[] _Salt, int _counter, int _derivedKeyLen)
-    {
-        return pbkdf2( HMAC_SHA256, _Password, _Salt, _counter, _derivedKeyLen);
-    }
-
-    /**
-     * derive a key from password and salt using given algorithm
-     * @param _algorithm        the algorithm to be used
-     * @param _Password         the password
-     * @param _Salt             the salt
-     * @param _counter          hash counter (ie. strength)
-     * @param _dkLen            length of derived key
-     * @return                  a key
-     */
-    @SneakyThrows
-    public static byte[] pbkdf2(String _algorithm, byte[] _Password, byte[] _Salt, int _counter, int _dkLen)
-    {
-        Mac _mac = Mac.getInstance(_algorithm);
-        _mac.init(new SecretKeySpec(_Password, _algorithm));
-        int _hLen = _mac.getMacLength();
-        byte[] _DK = new byte[_dkLen==-1 ? _hLen : _dkLen];
-        pbkdf2(_mac, _Salt, _counter, _DK);
-        return _DK;
-    }
-
-    /**
-     * derive a key from salt using given mac
-     * @param _mac              pre-provisioned mac with password
-     * @param _Salt             the salt
-     * @param _counter          hash counter (ie. strength)
-     * @param _DK               derived key
-     */
-    @SneakyThrows
-    public static void pbkdf2(Mac _mac, byte[] _Salt, int _counter, byte[] _DK)
-    {
-        int _hLen = _mac.getMacLength();
-
-        byte[] U      = new byte[_hLen];
-        byte[] T      = new byte[_hLen];
-        byte[] block1 = new byte[_Salt.length + 4];
-
-        int l = (int) Math.ceil((double) _DK.length / _hLen);
-        int r = _DK.length - (l - 1) * _hLen;
-
-        System.arraycopy(_Salt, 0, block1, 0, _Salt.length);
-
-        for (int i = 1; i <= l; i++)
-        {
-            block1[_Salt.length + 0] = (byte) (i >> 24 & 0xff);
-            block1[_Salt.length + 1] = (byte) (i >> 16 & 0xff);
-            block1[_Salt.length + 2] = (byte) (i >> 8  & 0xff);
-            block1[_Salt.length + 3] = (byte) (i >> 0  & 0xff);
-
-            _mac.update(block1);
-            _mac.doFinal(U, 0);
-            System.arraycopy(U, 0, T, 0, _hLen);
-
-            for (int j = 1; j < _counter; j++)
-            {
-                _mac.update(U);
-                _mac.doFinal(U, 0);
-
-                for (int k = 0; k < _hLen; k++)
-                {
-                    T[k] ^= U[k];
-                }
-            }
-
-            System.arraycopy(T, 0, _DK, (i - 1) * _hLen, (i == l ? r : _hLen));
-        }
+        return new byte[]{(byte) (_crc & 0xff), (byte) ((_crc >>> 8) & 0xff)};
     }
 
     // from https://stackoverflow.com/questions/6162651/half-precision-floating-point-in-java
     // ignores the higher 16 bits
-    public static float toFloatFrom16( short hbits )
-    {
+    public static float toFloatFrom16(short hbits) {
         int mant = hbits & 0x03ff;            // 10 bits mantissa
-        int exp =  hbits & 0x7c00;            // 5 bits exponent
-        if( exp == 0x7c00 )                   // NaN/Inf
+        int exp = hbits & 0x7c00;            // 5 bits exponent
+        if (exp == 0x7c00)                   // NaN/Inf
             exp = 0x3fc00;                    // -> NaN/Inf
-        else if( exp != 0 )                   // normalized value
+        else if (exp != 0)                   // normalized value
         {
             exp += 0x1c000;                   // exp - 15 + 127
-            if( mant == 0 && exp > 0x1c400 )  // smooth transition
-                return Float.intBitsToFloat( ( hbits & 0x8000 ) << 16
-                        | exp << 13 | 0x3ff );
-        }
-        else if( mant != 0 )                  // && exp==0 -> subnormal
+            if (mant == 0 && exp > 0x1c400)  // smooth transition
+                return Float.intBitsToFloat((hbits & 0x8000) << 16
+                        | exp << 13 | 0x3ff);
+        } else if (mant != 0)                  // && exp==0 -> subnormal
         {
             exp = 0x1c400;                    // make it normal
             do {
                 mant <<= 1;                   // mantissa * 2
                 exp -= 0x400;                 // decrease exp by 1
-            } while( ( mant & 0x400 ) == 0 ); // while not normal
+            } while ((mant & 0x400) == 0); // while not normal
             mant &= 0x3ff;                    // discard subnormal bit
         }                                     // else +/-0 -> +/-0
         return Float.intBitsToFloat(          // combine all parts
-                ( hbits & 0x8000 ) << 16          // sign  << ( 31 - 15 )
-                        | ( exp | mant ) << 13 );         // value << ( 23 - 10 )
+                (hbits & 0x8000) << 16          // sign  << ( 31 - 15 )
+                        | (exp | mant) << 13);         // value << ( 23 - 10 )
     }
 
     // returns all higher 16 bits as 0 for all results
-    public static short fromFloatTo16( float fval )
-    {
-        int fbits = Float.floatToIntBits( fval );
+    public static short fromFloatTo16(float fval) {
+        int fbits = Float.floatToIntBits(fval);
         int sign = fbits >>> 16 & 0x8000;          // sign only
-        int val = ( fbits & 0x7fffffff ) + 0x1000; // rounded value
+        int val = (fbits & 0x7fffffff) + 0x1000; // rounded value
 
-        if( val >= 0x47800000 )               // might be or become NaN/Inf
+        if (val >= 0x47800000)               // might be or become NaN/Inf
         {                                     // avoid Inf due to rounding
-            if( ( fbits & 0x7fffffff ) >= 0x47800000 )
-            {                                 // is or must become NaN/Inf
-                if( val < 0x7f800000 )        // was value but too large
+            if ((fbits & 0x7fffffff) >= 0x47800000) {                                 // is or must become NaN/Inf
+                if (val < 0x7f800000)        // was value but too large
                     return (short) (sign | 0x7c00);     // make it +/-Inf
                 return (short) (sign | 0x7c00 |        // remains +/-Inf or NaN
-                                        ( fbits & 0x007fffff ) >>> 13); // keep NaN (and Inf) bits
+                        (fbits & 0x007fffff) >>> 13); // keep NaN (and Inf) bits
             }
             return (short) (sign | 0x7bff);             // unrounded not quite Inf
         }
-        if( val >= 0x38800000 )               // remains normalized value
+        if (val >= 0x38800000)               // remains normalized value
             return (short) (sign | val - 0x38000000 >>> 13); // exp - 127 + 15
-        if( val < 0x33000000 )                // too small for subnormal
+        if (val < 0x33000000)                // too small for subnormal
             return (short) sign;                      // becomes +/-0
-        val = ( fbits & 0x7fffffff ) >>> 23;  // tmp exp for subnormal calc
-        return (short) (sign | ( ( fbits & 0x7fffff | 0x800000 ) // add subnormal bit
-                        + ( 0x800000 >>> val - 102 )     // round depending on cut off
-                        >>> 126 - val ));   // div by 2^(1-(exp-127+15)) and >> 13 | exp=0
+        val = (fbits & 0x7fffffff) >>> 23;  // tmp exp for subnormal calc
+        return (short) (sign | ((fbits & 0x7fffff | 0x800000) // add subnormal bit
+                + (0x800000 >>> val - 102)     // round depending on cut off
+                >>> 126 - val));   // div by 2^(1-(exp-127+15)) and >> 13 | exp=0
     }
 
+    public static interface SimpleDiscoverHostCallback
+    {
+        default void onDiscoveryPacket(InetAddress _address, int _port, DatagramPacket _dp)
+        {
+            if(_dp.getLength() < 16) return;
+
+            ByteBuf _buf = ByteBufAllocator.DEFAULT.buffer(_dp.getLength());
+            _buf.writeBytes(_dp.getData());
+            long _i1 = _buf.readLong();
+            long _i2 = _buf.readLong();
+            if(_i1 == SPECIAL_PACKET_ID)
+            {
+                byte[] _str = new byte[_buf.readInt()];
+                _buf.readBytes(_str);
+                String _name = new String(_str, StandardCharsets.UTF_8);
+
+                if(_i2 == FOUND_PACKET_ID)
+                {
+                    if(_address instanceof Inet6Address)
+                    {
+                        this.onDiscoveryPacket(_name, URI.create(String.format("udp://[%s]:%d", _address.getHostAddress(), _port)));
+                    }
+                    else
+                    {
+                        this.onDiscoveryPacket(_name, URI.create(String.format("udp://%s:%d", _address.getHostAddress(), _port)));
+                    }
+                }
+                else
+                if(_i2 == FOUND_WITH_URL_PACKET_ID)
+                {
+                    _str = new byte[_buf.readInt()];
+                    _buf.readBytes(_str);
+                    this.onDiscoveryPacket(_name, URI.create(new String(_str, StandardCharsets.UTF_8)));
+                }
+            }
+        }
+
+        void onDiscoveryPacket(String _name, URI _serverUri);
+    }
+
+    @SneakyThrows
+    public static final void simpleDiscoverHost(final int _port, final int _timeout, final SimpleDiscoverHostCallback _Callback)
+    {
+        DatagramSocket _ds = new DatagramSocket();
+        _ds.setSoTimeout(_timeout);
+        _ds.setBroadcast(true);
+
+        ByteBuf _buf = ByteBufAllocator.DEFAULT.buffer(16);
+        _buf.writeLong(SPECIAL_PACKET_ID);
+        _buf.writeLong(DISCOVERY_PACKET_ID);
+
+        final byte[] _data = new byte[16];
+        _buf.readBytes(_data);
+
+        Thread _thr = new Thread(new Runnable() {
+            @Override
+            @SneakyThrows
+            public void run() {
+                DatagramPacket _dp = new DatagramPacket(new byte[8192], 8192);
+                long _end = System.currentTimeMillis() + (_timeout);
+                do {
+                    try
+                    {
+                        _ds.receive(_dp);
+                        _Callback.onDiscoveryPacket(_dp.getAddress(), _dp.getPort(), _dp);
+                    }
+                    catch (SocketTimeoutException _ste)
+                    {
+                        //IGONRE
+                    }
+                }
+                while (_end > System.currentTimeMillis());
+
+                _ds.close();
+            }
+        });
+
+        _thr.start();
+
+        for(int _i = 0; _i<4; _i++)
+        {
+            for (NetworkInterface _iface : Collections.list(NetworkInterface.getNetworkInterfaces()))
+            {
+                for (InterfaceAddress _address : _iface.getInterfaceAddresses())
+                {
+                    _ds.send(new DatagramPacket(_data, _data.length, new InetSocketAddress(_address.getBroadcast(), _port)));
+                }
+            }
+            Thread.sleep(_timeout >> 2);
+        }
+    }
 }

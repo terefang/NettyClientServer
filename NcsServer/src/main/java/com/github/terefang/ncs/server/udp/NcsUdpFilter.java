@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageCodec;
 
+import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -30,23 +31,26 @@ public class NcsUdpFilter extends MessageToMessageCodec<DatagramPacket, Datagram
     @Override
     protected void decode(ChannelHandlerContext ctx, DatagramPacket msg, List<Object> out) throws Exception
     {
-        String _ip = msg.sender().getAddress().getHostAddress();
-        Ipv4 _ipv4 = Ipv4.of(_ip);
-        if(_config.getBannedAddresses().size()>0)
+        if(msg.sender().getAddress() instanceof Inet4Address)
         {
-            if(_config.getBannedAddresses().contains(_ipv4))
+            String _ip = msg.sender().getAddress().getHostAddress();
+            Ipv4 _ipv4 = Ipv4.of(_ip);
+            if(_config.getBannedAddresses().size()>0)
             {
-                return;
-            }
-        }
-
-        if(_config.getBannedNetworks().size()>0)
-        {
-            for(Ipv4Range _net : _config.getBannedNetworks())
-            {
-                if(_net.contains(_ipv4))
+                if(_config.getBannedAddresses().contains(_ipv4))
                 {
                     return;
+                }
+            }
+
+            if(_config.getBannedNetworks().size()>0)
+            {
+                for(Ipv4Range _net : _config.getBannedNetworks())
+                {
+                    if(_net.contains(_ipv4))
+                    {
+                        return;
+                    }
                 }
             }
         }

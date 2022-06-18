@@ -1,6 +1,7 @@
 package com.github.terefang.ncs.common.security.obf;
 
 import com.github.terefang.ncs.common.NcsHelper;
+import com.github.terefang.ncs.common.crypto.PBKDF;
 import lombok.Data;
 import lombok.SneakyThrows;
 
@@ -20,7 +21,7 @@ public class NcsPskObfCodecState
     public static final NcsPskObfCodecState from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
     {
         NcsPskObfCodecState _s = new NcsPskObfCodecState();
-        _s._pad = NcsHelper.pbkdf2_sha256(_sharedSecret, NcsPskObfCodecUtil.SALT, 1<<10, _max);
+        _s._pad = PBKDF.pbkdf2_sha256(_sharedSecret, NcsPskObfCodecUtil.SALT, 1<<10, _max);
         _s.useObf = _useObf;
         _s.useCRC = _useCRC;
         _s._mac = NcsHelper.crc16i(0, _s._pad);

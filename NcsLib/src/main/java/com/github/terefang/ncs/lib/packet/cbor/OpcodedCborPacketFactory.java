@@ -1,4 +1,4 @@
-package com.github.terefang.ncs.common.cbor;
+package com.github.terefang.ncs.lib.packet.cbor;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.OpcodeNcsPacketFactory;
