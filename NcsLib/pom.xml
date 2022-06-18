@@ -41,6 +41,18 @@
             <version>${jackson.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.terefang.NettyClientServer</groupId>
+            <artifactId>NcsServer</artifactId>
+            <version>${parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.terefang.NettyClientServer</groupId>
+            <artifactId>NcsClient</artifactId>
+            <version>${parent.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <pluginRepositories>

@@ -43,6 +43,11 @@ public abstract class AbstractNcsConnection extends SimpleChannelInboundHandler<
     }
 
     @Override
+    public void flush() {
+        this._channel.flush();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -94,6 +99,7 @@ public abstract class AbstractNcsConnection extends SimpleChannelInboundHandler<
         if(_stateListener!=null)
             _stateListener.onConnect(this);
     }
+
 
     /**
      * called from netty pipeline on disconnection from the server

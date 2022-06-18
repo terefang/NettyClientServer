@@ -87,6 +87,7 @@ public class KryoPacket extends AbstractNcsPacket implements NcsPacket
     {
         Output _out = new Output(1024, -1);
         _kryo.writeObject(_out, _object);
+        _out.flush();
         this.payload = _out.toBytes();
     }
 }

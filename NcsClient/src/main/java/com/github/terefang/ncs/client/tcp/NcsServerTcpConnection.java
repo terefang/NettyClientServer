@@ -7,6 +7,7 @@ import com.github.terefang.ncs.common.NcsPacketListener;
 import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.tcp.NcsTcpConnection;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.net.InetAddress;
 
@@ -51,5 +52,12 @@ public class NcsServerTcpConnection extends NcsTcpConnection implements NcsServe
     @Override
     public boolean isUdp() {
         return false;
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext _channelHandlerContext) throws Exception
+    {
+        // block normal state handling (onConnect)
+        _channelHandlerContext.fireChannelRegistered();
     }
 }

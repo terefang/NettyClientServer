@@ -4,9 +4,11 @@ import com.github.terefang.ncs.client.NcsClientConfiguration;
 import com.github.terefang.ncs.client.NcsClientService;
 import com.github.terefang.ncs.client.tcp.NcsClientTcpChannelInitializer;
 import com.github.terefang.ncs.client.udp.NcsClientUdpChannelInitializer;
+import com.github.terefang.ncs.common.NcsConnection;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -58,6 +60,17 @@ public class NcsClientServiceImpl implements NcsClientService
 
             _future = _bootstrap.connect(this.configuration.getEndpointAddress(), this.configuration.getEndpointPort());
         }
+
+        _future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture _cf) throws Exception {
+                if(NcsClientServiceImpl.this.configuration.getStateListener()!=null)
+                {
+                    NcsClientServiceImpl.this.configuration.getStateListener()
+                            .onConnect((NcsConnection) _cf.channel().pipeline().get("packet-handler"));
+                }
+            }
+        });
         return _future;
     }
 

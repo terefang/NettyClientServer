@@ -6,6 +6,7 @@ import com.github.terefang.ncs.common.security.obf.NcsPskObfTcpCodec;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.SslHandler;
+import io.netty.util.AttributeKey;
 
 import javax.net.ssl.SSLEngine;
 
@@ -51,5 +52,7 @@ public class NcsClientTcpChannelInitializer extends NcsTcpChannelInitializer
 
         // pojo codec
         _pl.addLast("packet-handler", _nc);
+
+
     }
 }
