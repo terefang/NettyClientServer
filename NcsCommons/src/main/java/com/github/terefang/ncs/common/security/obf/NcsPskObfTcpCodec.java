@@ -15,18 +15,19 @@ import java.util.List;
  */
 public class NcsPskObfTcpCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> implements NcsPskObfCodec {
 
-    public static final AttributeKey<NcsPskObfCodecState> OBF_CODEC_STATE = AttributeKey.valueOf(NcsPskObfCodecState.class.getCanonicalName());
+    // TODO
+    // public static final AttributeKey<NcsPskObfCodecState> OBF_CODEC_STATE = AttributeKey.valueOf(NcsPskObfCodecState.class.getCanonicalName());
 
-    NcsPskObfCodecState _state = null;
+    NcsPskObfCodecState _state;
 
     @Override
-    public boolean isTolerant() {
-        return _state.tolerant;
+    public NcsPskObfCodecState getState() {
+        return _state;
     }
 
     @Override
-    public void setTolerant(boolean tolerant) {
-        _state.tolerant = tolerant;
+    public void setState(NcsPskObfCodecState state) {
+        this._state = state;
     }
 
     /**
@@ -41,7 +42,7 @@ public class NcsPskObfTcpCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> i
     public static NcsPskObfTcpCodec from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
     {
         NcsPskObfTcpCodec _codec = new NcsPskObfTcpCodec();
-        _codec._state = NcsPskObfCodecState.from(_sharedSecret, _max, _useObf, _useCRC);
+        _codec.newState(_sharedSecret, _max, _useObf, _useCRC);
         return _codec;
     }
 
@@ -57,12 +58,12 @@ public class NcsPskObfTcpCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> i
     {
         try
         {
-            ByteBuf _next = NcsPskObfCodecUtil.obfuscate(_msg, this._state._pad, this._state._mac, this._state.useObf, this._state.useCRC, this._state._rng);
+            ByteBuf _next = NcsPskObfCodecUtil.obfuscate(_msg, this.getState());
             _out.add(_next);
         }
         catch (Exception _xe)
         {
-            if(!_state.tolerant) throw _xe;
+            if(!isTolerant()) throw _xe;
         }
     }
 
@@ -77,12 +78,12 @@ public class NcsPskObfTcpCodec extends MessageToMessageCodec<ByteBuf, ByteBuf> i
     protected void decode(ChannelHandlerContext _ctx, ByteBuf _msg, List<Object> _out) throws Exception {
         try
         {
-            ByteBuf _next = NcsPskObfCodecUtil.defuscate(_msg, this._state._pad, this._state._mac, this._state.useObf, this._state.useCRC, this._state._rng);
+            ByteBuf _next = NcsPskObfCodecUtil.defuscate(_msg, this.getState());
             _out.add(_next);
         }
         catch (Exception _xe)
         {
-            if(!_state.tolerant) throw _xe;
+            if(!isTolerant()) throw _xe;
         }
     }
 

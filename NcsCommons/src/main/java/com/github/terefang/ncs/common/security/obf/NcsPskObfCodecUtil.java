@@ -20,6 +20,12 @@ public class NcsPskObfCodecUtil
     public static int IV_LEN = 6;
 
     @SneakyThrows
+    public static ByteBuf obfuscate(ByteBuf _src, NcsPskObfCodecState _state)
+    {
+        return obfuscate(_src, _state._pad, _state._mac, _state.useObf, _state.useCRC, _state._rng);
+    }
+
+    @SneakyThrows
     public static ByteBuf obfuscate(ByteBuf _src, byte[] _pad, int _mac, boolean _useObf, boolean _useCRC, SecureRandom _rng)
     {
         int _len = _src.readableBytes();
@@ -51,6 +57,12 @@ public class NcsPskObfCodecUtil
         }
 
         return _buf;
+    }
+
+    @SneakyThrows
+    public static ByteBuf defuscate(ByteBuf _src, NcsPskObfCodecState _state)
+    {
+        return defuscate(_src, _state._pad, _state._mac, _state.useObf, _state.useCRC, _state._rng);
     }
 
     public static ByteBuf defuscate(ByteBuf _src, byte[] _pad, int _mac, boolean _useObf, boolean _useCRC, SecureRandom _rng)

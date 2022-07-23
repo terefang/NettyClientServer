@@ -320,4 +320,49 @@ public class NcsHelper {
             Thread.sleep(_timeout >> 2);
         }
     }
+
+    @SneakyThrows
+    public static final void simpleDiscoverHost(final InetAddress _address, final int _port, final int _timeout, final SimpleDiscoverHostCallback _Callback)
+    {
+        DatagramSocket _ds = new DatagramSocket();
+        _ds.setSoTimeout(_timeout);
+
+        ByteBuf _buf = ByteBufAllocator.DEFAULT.buffer(16);
+        _buf.writeLong(SPECIAL_PACKET_ID);
+        _buf.writeLong(DISCOVERY_PACKET_ID);
+
+        final byte[] _data = new byte[16];
+        _buf.readBytes(_data);
+
+        Thread _thr = new Thread(new Runnable() {
+            @Override
+            @SneakyThrows
+            public void run() {
+                DatagramPacket _dp = new DatagramPacket(new byte[8192], 8192);
+                long _end = System.currentTimeMillis() + (_timeout);
+                do {
+                    try
+                    {
+                        _ds.receive(_dp);
+                        _Callback.onDiscoveryPacket(_dp.getAddress(), _dp.getPort(), _dp);
+                    }
+                    catch (SocketTimeoutException _ste)
+                    {
+                        //IGONRE
+                    }
+                }
+                while (_end > System.currentTimeMillis());
+
+                _ds.close();
+            }
+        });
+
+        _thr.start();
+
+        for(int _i = 0; _i<4; _i++)
+        {
+            _ds.send(new DatagramPacket(_data, _data.length, new InetSocketAddress(_address, _port)));
+            Thread.sleep(_timeout >> 2);
+        }
+    }
 }

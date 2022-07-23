@@ -1,6 +1,8 @@
 package com.github.terefang.ncs.common;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
+import io.netty.channel.Channel;
+import lombok.SneakyThrows;
 
 /**
  * represents a connection to a peer
@@ -42,4 +44,21 @@ public interface NcsConnection
     void flush();
 
     boolean isUdp();
+
+    void setChannel(Channel _channel);
+
+    Channel getChannel();
+
+    @SneakyThrows
+    default void close()
+    {
+        if(!isUdp())
+        {
+            this.getChannel().close().sync();
+        }
+        else
+        {
+            throw new UnsupportedOperationException("unimplemented from here");
+        }
+    }
 }

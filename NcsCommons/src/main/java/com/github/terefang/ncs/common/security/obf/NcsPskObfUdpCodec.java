@@ -16,12 +16,17 @@ import java.util.List;
  */
 public class NcsPskObfUdpCodec extends MessageToMessageCodec<DatagramPacket, DatagramPacket> implements NcsPskObfCodec
 {
-    byte[] _pad;
-    int _mac;
-    boolean useObf;
-    boolean useCRC;
-    boolean tolerant = true;
-    SecureRandom _rng;
+    NcsPskObfCodecState _state;
+
+    @Override
+    public NcsPskObfCodecState getState() {
+        return _state;
+    }
+
+    @Override
+    public void setState(NcsPskObfCodecState state) {
+        this._state = state;
+    }
 
     /**
      * create thw codec based on the parameters
@@ -35,20 +40,8 @@ public class NcsPskObfUdpCodec extends MessageToMessageCodec<DatagramPacket, Dat
     public static NcsPskObfUdpCodec from(String _sharedSecret, int _max, boolean _useObf, boolean _useCRC)
     {
         NcsPskObfUdpCodec _codec = new NcsPskObfUdpCodec();
-        _codec._pad = PBKDF.pbkdf2_sha256(_sharedSecret, NcsPskObfCodecUtil.SALT, 1<<10, _max);
-        _codec.useObf = _useObf;
-        _codec.useCRC = _useCRC;
-        _codec._mac = NcsHelper.crc16i(0, _codec._pad);
-        _codec._rng = SecureRandom.getInstanceStrong();
+        _codec.newState(_sharedSecret, _max, _useObf, _useCRC);
         return _codec;
-    }
-
-    public boolean isTolerant() {
-        return tolerant;
-    }
-
-    public void setTolerant(boolean tolerant) {
-        this.tolerant = tolerant;
     }
 
     /**
@@ -63,12 +56,12 @@ public class NcsPskObfUdpCodec extends MessageToMessageCodec<DatagramPacket, Dat
     {
         try
         {
-            ByteBuf _next = NcsPskObfCodecUtil.obfuscate(_pkt.content(), this._pad, this._mac, this.useObf, this.useCRC, this._rng);
+            ByteBuf _next = NcsPskObfCodecUtil.obfuscate(_pkt.content(), this.getState());
             _out.add(new DatagramPacket(_next, _pkt.recipient(), _pkt.sender()));
         }
         catch (Exception _xe)
         {
-            if(!tolerant) throw _xe;
+            if(!isTolerant()) throw _xe;
         }
     }
 
@@ -83,12 +76,12 @@ public class NcsPskObfUdpCodec extends MessageToMessageCodec<DatagramPacket, Dat
     protected void decode(ChannelHandlerContext _ctx, DatagramPacket _pkt, List<Object> _out) throws Exception {
         try
         {
-            ByteBuf _next = NcsPskObfCodecUtil.defuscate(_pkt.content(), this._pad, this._mac, this.useObf, this.useCRC, this._rng);
+            ByteBuf _next = NcsPskObfCodecUtil.defuscate(_pkt.content(), this.getState());
             _out.add(new DatagramPacket(_next, _pkt.recipient(), _pkt.sender()));
         }
         catch (Exception _xe)
         {
-            if(!tolerant) throw _xe;
+            if(!isTolerant()) throw _xe;
         }
     }
 }
