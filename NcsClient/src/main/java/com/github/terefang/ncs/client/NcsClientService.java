@@ -58,8 +58,7 @@ public interface NcsClientService
     /**
      * connects to the server and whaits for completion
      */
-    @SneakyThrows
-    default void connectNow()
+    default void connectNow() throws Exception
     {
         ((ChannelFuture)this.connect()).sync();
     }
@@ -67,8 +66,7 @@ public interface NcsClientService
     /**
      * disconnects from the server and whaits for completion
      */
-    @SneakyThrows
-    default void disconnectNow()
+    default void disconnectNow() throws Exception
     {
         ((ChannelFuture)this.disconnect()).sync();
     }
