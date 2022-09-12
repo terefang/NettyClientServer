@@ -1,9 +1,11 @@
 package com.github.terefang.ncs.server;
 
 import com.github.terefang.ncs.common.packet.NcsPacket;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import lombok.SneakyThrows;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 public interface NcsServerService
@@ -75,4 +77,13 @@ public interface NcsServerService
      * @return the list
      */
     List<NcsClientConnection> listActivePeers();
+    /**
+     * returns list of active ppers
+     * @return the list
+     */
+    List<InetSocketAddress> listActiveUdpPeers();
+
+    NcsClientStatsHolder getClientStats(InetSocketAddress _address);
+
+    Channel getChannel();
 }

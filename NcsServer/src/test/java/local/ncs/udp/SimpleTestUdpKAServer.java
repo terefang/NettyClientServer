@@ -1,12 +1,9 @@
 package local.ncs.udp;
 
-import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.*;
 import com.github.terefang.ncs.common.packet.NcsKeepAlivePacket;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
-import com.github.terefang.ncs.server.NcsClientConnection;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 import local.ncs.SimpleTestServerHandler;
@@ -20,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class SimpleTestUdpServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class SimpleTestUdpKAServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener, NcsKeepAliveFailListener
 {
     SimpleTestServerHandler _handler = new SimpleTestServerHandler();
     List<InetSocketAddress> _peers = new Vector<>();
@@ -31,7 +28,7 @@ public class SimpleTestUdpServer implements NcsPacketListener<SimpleBytesNcsPack
     public static void main(String[] args) {
 
         // basic acllback handler
-        SimpleTestUdpServer _main = new SimpleTestUdpServer();
+        SimpleTestUdpKAServer _main = new SimpleTestUdpKAServer();
 
         // configure simple server
         NcsServerService _svc = NcsServerHelper.createSimpleUdpServer(56789, _main, _main);
@@ -40,6 +37,9 @@ public class SimpleTestUdpServer implements NcsPacketListener<SimpleBytesNcsPack
         //_svc.getConfiguration().setHandleDiscovery(true);
         // use optimized linux epoll transport
         _svc.getConfiguration().setUseEpoll(true);
+        _svc.getConfiguration().setClientKeepAliveTimeout(1000);
+        _svc.getConfiguration().setClientKeepAliveCounterMax(3);
+        _svc.getConfiguration().setClientKeepAliveUdpAutoDisconnect(true);
 
         _svc.startNow();
 
@@ -128,4 +128,8 @@ public class SimpleTestUdpServer implements NcsPacketListener<SimpleBytesNcsPack
         _connection.getContext(SimpleTestServerHandler.class).onError(_connection, _cause);
     }
 
+    @Override
+    public void onKeepAliveFail(NcsConnection _connection, long _timeout, long _fails, NcsEndpoint _endpoint) {
+        log.info("KEEP-ALIVE-FAIL: "+_endpoint.asString());
+    }
 }

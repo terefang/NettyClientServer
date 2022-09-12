@@ -1,8 +1,8 @@
 package com.github.terefang.ncs.server.tcp;
 
-import com.github.terefang.ncs.common.NcsEndpoint;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.*;
+import com.github.terefang.ncs.common.packet.NcsKeepAlivePacket;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.tcp.NcsTcpConnection;
 import com.github.terefang.ncs.server.NcsClientConnection;
 import com.github.terefang.ncs.server.NcsServerServiceImpl;
@@ -12,7 +12,7 @@ import io.netty.channel.socket.SocketChannel;
 
 import java.net.InetAddress;
 
-public class NcsClientTcpConnection extends NcsTcpConnection implements NcsClientConnection
+public class NcsClientTcpConnection extends NcsTcpConnection implements NcsClientConnection, NcsKeepAliveListener
 {
     public NcsClientTcpConnection()
     {
@@ -77,5 +77,43 @@ public class NcsClientTcpConnection extends NcsTcpConnection implements NcsClien
     @Override
     public boolean isUdp() {
         return false;
+    }
+
+    @Override
+    public boolean isClientMode() {
+        return false;
+    }
+
+    @Override
+    public void onKeepAlivePacket(NcsConnection _connection, NcsPacket _packet)
+    {
+        long _t = System.currentTimeMillis();
+        this.setHistoricRTT((this.getHistoricRTT() + this.getCurrentRTT()) >> 1);
+        this.setCurrentRTT(_t - ((NcsKeepAlivePacket)_packet).getTimestamp());
+        if(this._server instanceof NcsKeepAliveListener)
+        {
+            ((NcsKeepAliveListener)this._server).onKeepAlivePacket(_connection, _packet);
+        }
+    }
+
+    long currentRTT = 0;
+    long historicRTT = 0;
+
+    @Override
+    public long getCurrentRTT() {
+        return currentRTT;
+    }
+
+    public void setCurrentRTT(long currentRTT) {
+        this.currentRTT = currentRTT;
+    }
+
+    @Override
+    public long getHistoricRTT() {
+        return historicRTT;
+    }
+
+    public void setHistoricRTT(long historicRTT) {
+        this.historicRTT = historicRTT;
     }
 }

@@ -66,7 +66,7 @@ public class NcsTcpServerChannelInitializer extends NcsTcpChannelInitializer
         {
             NcsPskObfTcpCodec _cdc = NcsPskObfTcpCodec.from(this._config.getPskSharedSecret(), this._config.getMaxFrameLength(), this._config.isUsePskOBF(), this._config.isUsePskMac());
             _nc.setPskObfCodec(_cdc);
-            _pl.addAfter("protocol-packet-decoder", "frame-obfuscator", _cdc);
+            _pl.addAfter("protocol-frame-encoder", "frame-obfuscator", _cdc);
         }
 
         // pojo codec

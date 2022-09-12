@@ -60,4 +60,9 @@ public class NcsServerTcpConnection extends NcsTcpConnection implements NcsServe
         // block normal state handling (onConnect)
         _channelHandlerContext.fireChannelRegistered();
     }
+
+    @Override
+    public boolean isClientMode() {
+        return true;
+    }
 }

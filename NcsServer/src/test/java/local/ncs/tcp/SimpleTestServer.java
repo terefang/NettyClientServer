@@ -1,16 +1,20 @@
 package local.ncs.tcp;
 
-import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.*;
+import com.github.terefang.ncs.common.packet.NcsKeepAlivePacket;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
+import com.github.terefang.ncs.server.NcsClientConnection;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
 import local.ncs.SimpleTestServerHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
-public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener, NcsKeepAliveFailListener
 {
     /**
      * create a simple test server
@@ -22,10 +26,11 @@ public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>
         SimpleTestServer _main = new SimpleTestServer();
 
         // configure simple server
-        NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
+        final NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
         // use optimized linux epoll transport
         _svc.getConfiguration().setUseEpoll(true);
+
 
         _svc.startNow();
     }
@@ -93,6 +98,11 @@ public class SimpleTestServer implements NcsPacketListener<SimpleBytesNcsPacket>
     {
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onError(_connection, _cause);
+    }
+
+    @Override
+    public void onKeepAliveFail(NcsConnection _connection, long _timeout, long _fails, NcsEndpoint _endpoint) {
+        _connection.getContext(SimpleTestServerHandler.class).onKeepAliveFail(_connection, _timeout, _fails, _endpoint);
     }
 
     /** test for commandline -- send 3 pkt with size=1 -- only valid for max-frame<65535 -- psk=null

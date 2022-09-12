@@ -1,6 +1,7 @@
 package local.ncs;
 
 import com.github.terefang.ncs.common.NcsConnection;
+import com.github.terefang.ncs.common.NcsEndpoint;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,4 +55,9 @@ public class SimpleTestServerHandler
             log.info("ERROR " + _connection.getPeer().asString() + " -- " + _cause.getMessage(), _cause);
         }
     }
+
+    public void onKeepAliveFail(NcsConnection _connection, long _timeout, long _fails, NcsEndpoint _endpoint) {
+        log.info("KEEP-ALIVE-FAIL -> "+_endpoint.asString());
+    }
+
 }

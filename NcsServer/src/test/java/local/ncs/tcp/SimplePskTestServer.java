@@ -1,8 +1,6 @@
 package local.ncs.tcp;
 
-import com.github.terefang.ncs.common.NcsConnection;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.*;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import com.github.terefang.ncs.server.NcsServerHelper;
 import com.github.terefang.ncs.server.NcsServerService;
@@ -10,7 +8,7 @@ import local.ncs.SimpleTestServerHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener, NcsKeepAliveFailListener
 {
     /**
      * create a simple test server
@@ -25,8 +23,9 @@ public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPack
         NcsServerService _svc = NcsServerHelper.createSimpleServer(56789, _main, _main);
 
         _svc.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
-        _svc.getConfiguration().setUsePskOBF(false);
-        _svc.getConfiguration().setUsePskMac(false);
+        _svc.getConfiguration().setUsePskOBF(true);
+        _svc.getConfiguration().setUsePskMac(true);
+
 
         // use optimized linux epoll transport
         _svc.getConfiguration().setUseEpoll(true);
@@ -97,5 +96,11 @@ public class SimplePskTestServer implements NcsPacketListener<SimpleBytesNcsPack
     {
         // get custom/user context and call some method
         _connection.getContext(SimpleTestServerHandler.class).onError(_connection, _cause);
+    }
+
+    @Override
+    public void onKeepAliveFail(NcsConnection _connection, long _timeout, long _fails, NcsEndpoint _endpoint)
+    {
+        System.err.println(String.format("K_A_FAIL %s , %d %d", _endpoint.asString(), _timeout, _fails));
     }
 }

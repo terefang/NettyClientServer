@@ -19,8 +19,21 @@ public class NcsPacketDecoder extends MessageToMessageDecoder<ByteBuf>
     @Override
     protected void decode(ChannelHandlerContext _ctx, ByteBuf _buf, List<Object> _list) throws Exception
     {
-        NcsPacket _pkt = this._factory.unpack(_buf);
+        NcsPacket _pkt = null;
+        if(isKeepAlivePacket(_buf))
+        {
+            _pkt = NcsKeepAlivePacket.create(_buf);
+        }
+        else
+        {
+            _pkt = this._factory.unpack(_buf);
+        }
         _pkt.setAddress((InetSocketAddress) _ctx.channel().remoteAddress());
         _list.add(_pkt);
+    }
+
+    private boolean isKeepAlivePacket(ByteBuf buf)
+    {
+        return (buf.readableBytes() == NcsKeepAlivePacket.PACKET_SIZE) && (buf.getLong(0) == -1L) && (buf.getLong(8) == -1L);
     }
 }

@@ -1,15 +1,15 @@
 package com.github.terefang.ncs.server.udp;
 
-import com.github.terefang.ncs.common.NcsEndpoint;
-import com.github.terefang.ncs.common.NcsPacketListener;
-import com.github.terefang.ncs.common.NcsStateListener;
+import com.github.terefang.ncs.common.*;
+import com.github.terefang.ncs.common.packet.NcsKeepAlivePacket;
+import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.udp.NcsUdpConnection;
 import com.github.terefang.ncs.server.NcsClientConnection;
 import com.github.terefang.ncs.server.NcsServerServiceImpl;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
-public class NcsClientUdpConnection extends NcsUdpConnection implements NcsClientConnection
+public class NcsClientUdpConnection extends NcsUdpConnection implements NcsClientConnection, NcsKeepAliveListener
 {
     public NcsClientUdpConnection()
     {
@@ -55,6 +55,16 @@ public class NcsClientUdpConnection extends NcsUdpConnection implements NcsClien
     }
 
     @Override
+    public long getCurrentRTT() {
+        return 0;
+    }
+
+    @Override
+    public long getHistoricRTT() {
+        return 0;
+    }
+
+    @Override
     public void setContext(Object _context) {
         throw new UnsupportedOperationException("not implemented -- in NcsClientUdpConnection/setContext");
     }
@@ -67,5 +77,29 @@ public class NcsClientUdpConnection extends NcsUdpConnection implements NcsClien
     @Override
     public NcsEndpoint getPeer() {
         throw new UnsupportedOperationException("not implemented -- in NcsClientUdpConnection/getPeer");
+    }
+
+    @Override
+    public boolean isClientMode() {
+        return false;
+    }
+
+    @Override
+    public void onKeepAlivePacket(NcsConnection _connection, NcsPacket _packet)
+    {
+        if(this._server instanceof NcsKeepAliveListener)
+        {
+            ((NcsKeepAliveListener)this._server).onKeepAlivePacket(_connection, _packet);
+        }
+    }
+
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception
+    {
+        super.channelRead(ctx, msg);
+        if((msg instanceof NcsPacket) && !this._server.getClientUdpConnections().contains(((NcsPacket)msg).getAddress()))
+        {
+            this._server.getClientUdpConnections().add(((NcsPacket)msg).getAddress());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.terefang.ncs.common;
 
+import com.github.terefang.ncs.common.packet.NcsKeepAlivePacket;
 import com.github.terefang.ncs.common.packet.NcsPacket;
 import com.github.terefang.ncs.common.security.obf.NcsPskObfCodec;
 import io.netty.channel.Channel;
@@ -78,8 +79,28 @@ public abstract class AbstractNcsConnection extends SimpleChannelInboundHandler<
      * @throws Exception
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext _channelHandlerContext, NcsPacket _ncsPacket) throws Exception
+    protected void channelRead0(ChannelHandlerContext _channelHandlerContext, final NcsPacket _ncsPacket) throws Exception
     {
+        if(_ncsPacket instanceof NcsKeepAlivePacket)
+        {
+            if(this.isClientMode())
+            {
+                NcsHelper.runLater(() -> {
+                    this.sendAndFlush(_ncsPacket);
+                });
+            }
+            else
+            if(this._stateListener instanceof NcsKeepAliveListener)
+            {
+                ((NcsKeepAliveListener)this._stateListener).onKeepAlivePacket(this, _ncsPacket);
+            }
+            else
+            if(this instanceof NcsKeepAliveListener)
+            {
+                ((NcsKeepAliveListener)this).onKeepAlivePacket(this, _ncsPacket);
+            }
+        }
+        else
         if(this._packetListener!=null)
         {
             this._packetListener.onPacket(this, _ncsPacket);

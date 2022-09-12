@@ -15,7 +15,9 @@ public class NcsClientConfiguration extends NcsConfiguration
      * @return the configuration
      */
     public static NcsClientConfiguration create() {
-        return new NcsClientConfiguration();
+        NcsClientConfiguration ret = new NcsClientConfiguration();
+        ret.setClientMode(true);
+        return ret;
     }
 
     /**

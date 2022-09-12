@@ -22,6 +22,7 @@ public class NcsConfiguration
     NcsStateListener stateListener;
 
     boolean useUdp = false;
+    boolean clientMode = false;
 
     int timeout = 1<<8;
     int maxFrameLength = 1<<13;

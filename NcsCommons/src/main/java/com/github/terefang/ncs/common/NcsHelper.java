@@ -365,4 +365,11 @@ public class NcsHelper {
             Thread.sleep(_timeout >> 2);
         }
     }
+
+    public static Thread runLater(Runnable _run)
+    {
+        Thread _thr = new Thread(_run);
+        _thr.start();
+        return _thr;
+    }
 }

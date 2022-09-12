@@ -8,16 +8,18 @@ import com.github.terefang.ncs.common.NcsStateListener;
 import com.github.terefang.ncs.common.packet.SimpleBytesNcsPacket;
 import lombok.SneakyThrows;
 
-public class SimpleTestClient  implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
+public class SimpleTlsClient implements NcsPacketListener<SimpleBytesNcsPacket>, NcsStateListener
 {
     @SneakyThrows
     public static void main(String[] args) {
-        SimpleTestClient _main = new SimpleTestClient();
+        SimpleTlsClient _main = new SimpleTlsClient();
 
         // create simple server
-        NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, _main, _main);
-        //NcsClientService _client = NcsClientHelper.createSimpleClient("209.94.56.133", 54556, _main, _main);
+        //NcsClientService _client = NcsClientHelper.createSimpleClient("127.0.0.1", 56789, _main, _main);
+        NcsClientService _client = NcsClientHelper.createSimpleClient("209.94.56.133", 54556, _main, _main);
 
+        //_client.getConfiguration().setSharedSecret("07cwI&Y4gLXtJrQdfYWcKey!cseY9jB0Q*bveiT$zi6LX7%xMuGm!hzW%rQj%8Wf");
+        _client.getConfiguration().setTlsEnabled(true);
         // sync connect
         _client.connectNow();
 

@@ -47,4 +47,9 @@ public class NcsServerUdpConnection extends NcsUdpConnection implements NcsServe
     public boolean isUdp() {
         return true;
     }
+
+    @Override
+    public boolean isClientMode() {
+        return true;
+    }
 }

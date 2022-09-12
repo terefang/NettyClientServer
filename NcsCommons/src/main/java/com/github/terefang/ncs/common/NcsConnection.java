@@ -61,4 +61,6 @@ public interface NcsConnection
             throw new UnsupportedOperationException("unimplemented from here");
         }
     }
+
+    boolean isClientMode();
 }

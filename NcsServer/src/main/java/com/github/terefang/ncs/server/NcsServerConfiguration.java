@@ -21,9 +21,16 @@ public class NcsServerConfiguration extends NcsConfiguration
     String discoveryConnectUrl = null;
     String discoveryConnectName = null;
 
+    int clientKeepAliveTimeout = -1;
+    int clientKeepAliveCounterMax = -1;
+    boolean clientKeepAliveTcpAutoDisconnect = false;
+    boolean clientKeepAliveUdpAutoDisconnect = false;
+
     public static NcsServerConfiguration create()
     {
-        return new NcsServerConfiguration();
+        NcsServerConfiguration ret = new NcsServerConfiguration();
+        ret.setClientMode(false);
+        return ret;
     }
 
     int workers = Runtime.getRuntime().availableProcessors()*2+1;
