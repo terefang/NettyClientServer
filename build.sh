@@ -3,6 +3,9 @@ bDATE=$(date '+%Y%m%d%H%M%S')
 bDIR=$(dirname $0)
 bDIR=$(cd $bDIR && pwd)
 
+yDATE=$(date '+%Y')
+mDATE=$(date '+%-m')
+
 #OPTS="-DskipTests=true -DproxySet=true -DproxyHost=127.0.0.1 -DproxyPort=3128 -Dhttps.nonProxyHosts=127.0.0.1"
 OPTS="-DskipTests=true"
 
@@ -20,6 +23,10 @@ while test ! -z "$1" ; do
       (cd $bDIR && mvn -X build-helper:parse-version versions:set \
                 -DnewVersion="\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}" ) || exit 1
       ;;
+    -drel*)
+          (cd $bDIR && mvn -X build-helper:parse-version versions:set \
+                    -DnewVersion="${yDATE}.${mDATE}.\${parsedVersion.nextIncrementalVersion}" ) || exit 1
+          ;;
     -clean*)
       (cd $bDIR && mvn clean $OPTS -U) || exit 1
       ;;
